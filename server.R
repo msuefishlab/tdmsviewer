@@ -57,8 +57,14 @@ shinyServer(function(input, output) {
         if(input$object == "Choose object") {
             return()
         }
+
         datatable<-dataInput()
-        sliderInput("startTime", "Start", min=0, max=max(datatable$time), value = 0)
+        r = datatable$objects[[input$object]]
+        t = r$time_track()
+        print(min(t))
+        print(max(t))
+
+        sliderInput("startTime", "Start", min=floor(min(t)), max=ceil(max(t)), value = 0)
     })
   
   
@@ -70,8 +76,11 @@ shinyServer(function(input, output) {
             return()
         }
         
+
         datatable<-dataInput()
-        sliderInput("endTime", "End", min=0, max=max(datatable$time), value = 0.5)
+        r = datatable$objects[[input$object]]
+        t = r$time_track()
+        sliderInput("endTime", "End", min=min(t), max=max(t), value = 0.5)
     })
     
     
@@ -79,7 +88,7 @@ shinyServer(function(input, output) {
         if(is.null(input$endTime)) {
             return()
         }
-        datatable<-dataInput()
+
         sliderInput("fineStartTime", "Adjust start", min=input$startTime, max=input$endTime, value = input$startTime)
     })
     
@@ -88,7 +97,6 @@ shinyServer(function(input, output) {
         if(is.null(input$startTime)) {
             return()
         }
-        datatable<-dataInput()
         sliderInput("fineEndTime", "Adjust end", min=input$startTime, max=input$endTime, value = input$endTime)
     })
     
@@ -96,7 +104,6 @@ shinyServer(function(input, output) {
         if(is.null(input$fineEndTime)) {
             return()
         }
-        datatable<-dataInput()
         sliderInput("superFineStartTime", "Adjust start (finetune)", min=input$fineStartTime, max=input$fineEndTime, value = input$fineStartTime)
     })
     
@@ -105,7 +112,6 @@ shinyServer(function(input, output) {
         if(is.null(input$fineStartTime)) {
             return()
         }
-        datatable<-dataInput()
         sliderInput("superFineEndTime", "Adjust end (finetune)", min=input$fineStartTime, max=input$fineEndTime, value = input$fineEndTime)
     })
    
@@ -132,11 +138,9 @@ shinyServer(function(input, output) {
         r = datatable$objects[[input$object]]
         t = r$time_track()
         s = r$data
-        ret = data.frame(time=t, data=s)
-
        
         #values = ret$time > s & ret$time < e
-        plot(ret, type='l', xlab='time', ylab='volts')
+        plot(t[1:100], s[1:100], type='l', xlab='time', ylab='volts')
     })
   
 
