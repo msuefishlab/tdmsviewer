@@ -1,8 +1,7 @@
 library(shiny)
-library(data.table)
+library(tdmsreader)
 
-dirs = list.files('data',full.names = T)
-datatable = NULL
+dirs = list.files('data', full.names = T)
 
 shinyServer(function(input, output) {
   
@@ -19,8 +18,8 @@ shinyServer(function(input, output) {
     if(input$dir == "Choose directory") {
       return()
     }
-    csvs = list.files(input$dir, pattern = ".csv$")
-    selectInput("dataset", "TDMS File", c("Choose csv", csvs))
+    tdmss = list.files(input$dir, pattern = ".tdms$")
+    selectInput("dataset", "TDMS File", c("Choose tdms", tdmss))
   })
   
   
@@ -28,7 +27,7 @@ shinyServer(function(input, output) {
     if(is.null(input$dataset)) {
       return()
     }
-    if(input$dataset == "Choose csv") {
+    if(input$dataset == "Choose tdms") {
       return()
     }
     datatable<-dataInput()
@@ -40,7 +39,7 @@ shinyServer(function(input, output) {
     if(is.null(input$dataset)) {
       return()
     }
-    if(input$dataset == "Choose csv") {
+    if(input$dataset == "Choose tdms") {
       return()
     }
     datatable<-dataInput()
@@ -94,7 +93,7 @@ shinyServer(function(input, output) {
     if(is.null(input$dataset)) {
       return()
     }
-    if(input$dataset == "Choose csv") {
+    if(input$dataset == "Choose tdms") {
       return()
     }
 
