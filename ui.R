@@ -11,6 +11,7 @@ shinyUI(fluidPage(
     sidebarPanel(
       uiOutput("dirs"),
       uiOutput("datasets"),
+      uiOutput("objects"),
       uiOutput("startTimer"),
       uiOutput("endTimer"),
       uiOutput("fineStartTimer"),
