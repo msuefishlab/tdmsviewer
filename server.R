@@ -20,7 +20,7 @@ shinyServer(function(input, output) {
 
     output$dirs <- renderUI({
         dirs = list.files('data', full.names = T)
-        selectInput("dir", "Data group", c("Choose directory", dirs))
+        selectInput("dir", "Data group", dirs)
     })
 
 
@@ -28,30 +28,27 @@ shinyServer(function(input, output) {
         if (is.null(input$dir)) {
             return()
         }
-        if (input$dir == "Choose directory") {
-            return()
-        }
         tdmss = list.files(input$dir, pattern = ".tdms$")
-        selectInput("dataset", "TDMS File", c("Choose tdms", tdmss))
+        selectInput("dataset", "TDMS File", tdmss)
     })
 
     output$objects <- renderUI({
         if (is.null(input$dataset)) {
             return()
         }
-        if (input$dataset == "Choose tdms") {
-            return()
-        }
         datatable <- dataInput()
-        selectInput("object", "TDMS Object", c("Choose object", ls(datatable$objects)))
+        l = list()
+        for(elt in ls(datatable$objects)) {
+            if(datatable$objects[[elt]]$has_data) {
+                l[[elt]] = elt
+            }
+        }
+        selectInput("object", "TDMS Object", l)
     })
 
 
     output$startTimer <- renderUI({
         if (is.null(input$object)) {
-            return()
-        }
-        if (input$object == "Choose object") {
             return()
         }
 
@@ -66,10 +63,6 @@ shinyServer(function(input, output) {
         if (is.null(input$object)) {
             return()
         }
-        if (input$object == "Choose object") {
-            return()
-        }
-
 
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
@@ -116,15 +109,12 @@ shinyServer(function(input, output) {
         if (is.null(input$object)) {
             return()
         }
-        if (input$dataset == "Choose object") {
-            return()
-        }
-        if (is.null(input$superFineStartTime)) {
-            return()
-        }
 
         s = input$superFineStartTime
         e = input$superFineEndTime
+        if (is.null(s) || is.null(e)) {
+            return()
+        }
 
         my_file = file(paste0(input$dir, '/', input$dataset), "rb")
         main = TdmsFile$new(my_file)
