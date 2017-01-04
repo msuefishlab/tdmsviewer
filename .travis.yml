@@ -1,0 +1,6 @@
+sudo: false
+language: R
+cache: packages
+script:
+  Rscript -e 'lintr::lint("server.R")'
+  Rscript -e 'lintr::lint("ui.R")'
