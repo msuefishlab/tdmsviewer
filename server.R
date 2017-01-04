@@ -2,8 +2,6 @@ library(shiny)
 library(tdmsreader)
 library(futile.logger)
 
-
-
 flog.threshold(DEBUG)
 
 # open file
@@ -13,10 +11,9 @@ shinyServer(function(input, output) {
     dataInput <- reactive({
         withProgress(message = 'Loading...', value = 0, {
             my_file = file(paste0(input$dir, '/', input$dataset), "rb")
-
-            main <- TdmsFile$new(my_file)
+            x = TdmsFile$new(my_file)
             close(my_file)
-            return (main)
+            return (x)
         })
     })
 
@@ -61,8 +58,6 @@ shinyServer(function(input, output) {
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         t = r$time_track()
-        print(min(t))
-        print(max(t))
 
         sliderInput("startTime", "Start", min = floor(min(t)), max = ceiling(max(t)), value = 0)
     })
@@ -80,7 +75,7 @@ shinyServer(function(input, output) {
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         t = r$time_track()
-        sliderInput("endTime", "End", min = min(t), max = max(t), value = 0.5)
+        sliderInput("endTime", "End", min = floor(min(t)), max = ceiling(max(t)), value = 0.5)
     })
 
 
@@ -125,9 +120,6 @@ shinyServer(function(input, output) {
         if (input$dataset == "Choose object") {
             return()
         }
-
-        datatable <- dataInput()
-
         if (is.null(input$superFineStartTime)) {
             return()
         }
@@ -135,13 +127,15 @@ shinyServer(function(input, output) {
         s = input$superFineStartTime
         e = input$superFineEndTime
 
-        r = datatable$objects[[input$object]]
-        t = r$time_track()
+        my_file = file(paste0(input$dir, '/', input$dataset), "rb")
+        main = TdmsFile$new(my_file)
+        main$read_data(my_file, s, e)
+
+        r = main$objects[[input$object]]
+        t = r$time_track(start = s, end = e)
         s = r$data
+        close(my_file)
 
-        plot(t[1:100], s[1:100], type = 'l', xlab = 'time', ylab = 'volts')
+        plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
     })
-
-
-
 })
