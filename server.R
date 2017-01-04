@@ -57,9 +57,8 @@ shinyServer(function(input, output) {
 
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
-        t = r$time_track()
-
-        sliderInput("startTime", "Start", min = floor(min(t)), max = ceiling(max(t)), value = 0)
+        max = r$number_values * r$properties[['wf_increment']]
+        sliderInput("startTime", "Start", min = 0, max = ceiling(max), value = 0)
     })
 
 
@@ -74,8 +73,8 @@ shinyServer(function(input, output) {
 
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
-        t = r$time_track()
-        sliderInput("endTime", "End", min = floor(min(t)), max = ceiling(max(t)), value = 0.5)
+        max = r$number_values * r$properties[['wf_increment']]
+        sliderInput("endTime", "End", min = 0, max = ceiling(max), value = 0.5)
     })
 
 
