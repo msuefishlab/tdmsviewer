@@ -67,7 +67,7 @@ shinyServer(function(input, output) {
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        sliderInput("endTime", "End", min = 0, max = ceiling(max), value = 0.5)
+        sliderInput("endTime", "End", min = 0, max = ceiling(max), value = 1)
     })
 
 
