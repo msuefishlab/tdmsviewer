@@ -46,76 +46,13 @@ shinyServer(function(input, output) {
         selectInput("object", "TDMS Object", l)
     })
 
-
-    output$startTimer <- renderUI({
-        if (is.null(input$object)) {
-            return()
-        }
-
-        datatable <- dataInput()
-        r = datatable$objects[[input$object]]
-        max = r$number_values * r$properties[['wf_increment']]
-        sliderInput("startTime", "Start", min = 0, max = ceiling(max), value = 0)
-    })
-
-
-    output$endTimer <- renderUI({
-        if (is.null(input$object)) {
-            return()
-        }
-
-        datatable <- dataInput()
-        r = datatable$objects[[input$object]]
-        max = r$number_values * r$properties[['wf_increment']]
-        sliderInput("endTime", "End", min = 0, max = ceiling(max), value = 1)
-    })
-
-
-    output$fineStartTimer <- renderUI({
-        if (is.null(input$endTime)) {
-            return()
-        }
-
-        sliderInput("fineStartTime", "Adjust start", min = input$startTime, max = input$endTime, value = input$startTime)
-    })
-
-
-    output$fineEndTimer <- renderUI({
-        if (is.null(input$startTime)) {
-            return()
-        }
-        sliderInput("fineEndTime", "Adjust end", min = input$startTime, max = input$endTime, value = input$endTime)
-    })
-
-    output$superFineStartTimer <- renderUI({
-        if (is.null(input$fineEndTime)) {
-            return()
-        }
-        sliderInput("superFineStartTime", "Adjust start (finetune)", min = input$fineStartTime, max = input$fineEndTime, value = input$fineStartTime)
-    })
-
-
-    output$superFineEndTimer <- renderUI({
-        if (is.null(input$fineStartTime)) {
-            return()
-        }
-        sliderInput("superFineEndTime", "Adjust end (finetune)", min = input$fineStartTime, max = input$fineEndTime, value = input$fineEndTime)
-    })
-
-
-
-
     output$distPlot <- renderPlot({
         if (is.null(input$object)) {
             return()
         }
 
-        s = input$superFineStartTime
-        e = input$superFineEndTime
-        if (is.null(s) || is.null(e)) {
-            return()
-        }
-
+        s = ifelse(!is.null(ranges2$xmin), ranges2$xmin, 0)
+        e = ifelse(!is.null(ranges2$xmax), ranges2$xmax, 1)
         my_file = file(paste0(input$dir, '/', input$dataset), "rb")
         main = TdmsFile$new(my_file)
         main$read_data(my_file, s, e)
@@ -126,5 +63,15 @@ shinyServer(function(input, output) {
         close(my_file)
 
         plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
+    })
+
+
+    ranges2 <- reactiveValues(xmin = NULL, xmax = NULL)
+
+
+    observe({
+        brush <- input$plot_brush
+        ranges2$xmin <- brush$xmin
+        ranges2$xmax <- brush$xmax
     })
 })

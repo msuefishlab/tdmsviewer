@@ -11,18 +11,23 @@ shinyUI(fluidPage(
     sidebarPanel(
       uiOutput("dirs"),
       uiOutput("datasets"),
-      uiOutput("objects"),
-      uiOutput("startTimer"),
-      uiOutput("endTimer"),
-      uiOutput("fineStartTimer"),
-      uiOutput("fineEndTimer"),
-      uiOutput("superFineStartTimer"),
-      uiOutput("superFineEndTimer")
+      uiOutput("objects")
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
-      plotOutput("distPlot")
+      plotOutput("distPlot",
+        click = "plot_click",
+        dblclick = dblclickOpts(
+          id = "plot_dblclick"
+        ),
+        hover = hoverOpts(
+          id = "plot_hover"
+        ),
+        brush = brushOpts(
+          id = "plot_brush"
+        )
+      )
     )
   )
 ))
