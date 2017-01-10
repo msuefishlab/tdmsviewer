@@ -46,6 +46,17 @@ shinyServer(function(input, output) {
         selectInput("object", "TDMS Object", l)
     })
 
+    output$sliderRange <- renderUI({
+        if (is.null(input$object)) {
+            return()
+        }
+
+        datatable <- dataInput()
+        r = datatable$objects[[input$object]]
+        max = r$number_values * r$properties[['wf_increment']]
+        sliderInput("sliderRange", "Start", min = 0, max = ceiling(max), value = c(0, 1))
+    })
+
     output$distPlot <- renderPlot({
         if (is.null(input$object)) {
             return()
@@ -68,10 +79,19 @@ shinyServer(function(input, output) {
 
     ranges2 <- reactiveValues(xmin = NULL, xmax = NULL)
 
-
     observe({
         brush <- input$plot_brush
-        ranges2$xmin <- brush$xmin
-        ranges2$xmax <- brush$xmax
+        range <- input$sliderRange
+        print(range[1])
+        print(range[2])
+        if(is.null(brush)) {
+			ranges2$xmin <- range[1]
+			ranges2$xmax <- range[2]
+		}
+		else {
+			ranges2$xmin <- brush$xmin
+			ranges2$xmax <- brush$xmax
+            input
+		}
     })
 })

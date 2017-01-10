@@ -11,7 +11,8 @@ shinyUI(fluidPage(
     sidebarPanel(
       uiOutput("dirs"),
       uiOutput("datasets"),
-      uiOutput("objects")
+      uiOutput("objects"),
+      uiOutput("sliderRange")
     ),
 
     # Show a plot of the generated distribution
