@@ -18,15 +18,10 @@ shinyUI(fluidPage(
     # Show a plot of the generated distribution
     mainPanel(
       plotOutput("distPlot",
-        click = "plot_click",
-        dblclick = dblclickOpts(
-          id = "plot_dblclick"
-        ),
-        hover = hoverOpts(
-          id = "plot_hover"
-        ),
         brush = brushOpts(
-          id = "plot_brush"
+          id = "plot_brush",
+          resetOnNew = T,
+          direction = "x"
         )
       )
     )

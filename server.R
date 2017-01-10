@@ -5,7 +5,7 @@ library(futile.logger)
 flog.threshold(DEBUG)
 
 # open file
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
 
 
     dataInput <- reactive({
@@ -15,6 +15,19 @@ shinyServer(function(input, output) {
             close(my_file)
             return (x)
         })
+    })
+
+    ranges <- reactiveValues(xmin = 0, xmax = 1)
+	observeEvent(input$plot_brush, {
+		brush <- input$plot_brush
+		if (!is.null(brush)) {
+			ranges$xmin <- brush$xmin
+            ranges$xmax <- brush$xmax
+		}
+	})
+    observeEvent(input$sliderRange, {
+        ranges$xmin <- input$sliderRange[1]
+        ranges$xmax <- input$sliderRange[2]
     })
 
 
@@ -50,11 +63,10 @@ shinyServer(function(input, output) {
         if (is.null(input$object)) {
             return()
         }
-
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        sliderInput("sliderRange", "Start", min = 0, max = ceiling(max), value = c(0, 1))
+        sliderInput("sliderRange", "Start", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.001)
     })
 
     output$distPlot <- renderPlot({
@@ -62,8 +74,9 @@ shinyServer(function(input, output) {
             return()
         }
 
-        s = ifelse(!is.null(ranges2$xmin), ranges2$xmin, 0)
-        e = ifelse(!is.null(ranges2$xmax), ranges2$xmax, 1)
+        s = ranges$xmin
+        e = ranges$xmax
+
         my_file = file(paste0(input$dir, '/', input$dataset), "rb")
         main = TdmsFile$new(my_file)
         main$read_data(my_file, s, e)
@@ -74,24 +87,5 @@ shinyServer(function(input, output) {
         close(my_file)
 
         plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
-    })
-
-
-    ranges2 <- reactiveValues(xmin = NULL, xmax = NULL)
-
-    observe({
-        brush <- input$plot_brush
-        range <- input$sliderRange
-        print(range[1])
-        print(range[2])
-        if(is.null(brush)) {
-			ranges2$xmin <- range[1]
-			ranges2$xmax <- range[2]
-		}
-		else {
-			ranges2$xmin <- brush$xmin
-			ranges2$xmax <- brush$xmax
-            input
-		}
     })
 })
