@@ -5,7 +5,7 @@ library(futile.logger)
 flog.threshold(DEBUG)
 
 # open file
-shinyServer(function(input, output, session) {
+shinyServer(function(input, output) {
 
 
     dataInput <- reactive({
@@ -28,6 +28,21 @@ shinyServer(function(input, output, session) {
     observeEvent(input$sliderRange, {
         ranges$xmin <- input$sliderRange[1]
         ranges$xmax <- input$sliderRange[2]
+    })
+    observeEvent(input$zoomIn, {
+        t1 = ranges$xmax
+        t2 = ranges$xmin
+        ranges$xmin = t2 + (t1 - t2) / 3
+        ranges$xmax = t1 - (t1 - t2) / 3
+    })
+    observeEvent(input$zoomOut, {
+        t1 = ranges$xmax
+        t2 = ranges$xmin
+        datatable <- dataInput()
+        r = datatable$objects[[input$object]]
+        max = r$number_values * r$properties[['wf_increment']]
+        ranges$xmin = max(t2 - (t1 - t2) / 2, 0)
+        ranges$xmax = min(t1 + (t1 - t2) / 2, max)
     })
 
 
@@ -66,7 +81,7 @@ shinyServer(function(input, output, session) {
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        sliderInput("sliderRange", "Start", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.001)
+        sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001)
     })
 
     output$distPlot <- renderPlot({

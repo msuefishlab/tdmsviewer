@@ -9,10 +9,13 @@ shinyUI(fluidPage(
   # Sidebar with a slider input for the number of bins
   sidebarLayout(
     sidebarPanel(
+      p("Use the slider to extend range of the plot or click-and-drag your mouse over an area of the plot to zoom in"),
       uiOutput("dirs"),
       uiOutput("datasets"),
       uiOutput("objects"),
-      uiOutput("sliderRange")
+      uiOutput("sliderRange"),
+      actionButton("zoomIn", label = "+"),
+      actionButton("zoomOut", label = "-")
     ),
 
     # Show a plot of the generated distribution
