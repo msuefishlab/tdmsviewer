@@ -24,8 +24,10 @@ shinyServer(function(input, output) {
         }
     })
     observeEvent(input$sliderRange, {
-        ranges$xmin <- input$sliderRange[1]
-        ranges$xmax <- input$sliderRange[2]
+        if(abs(ranges$xmin - input$sliderRange[1])>0.1 || abs(ranges$xmax - input$sliderRange[2])>0.1) {
+            ranges$xmin <- input$sliderRange[1]
+            ranges$xmax <- input$sliderRange[2]
+        }
     })
     observeEvent(input$zoomIn, {
         t1 = ranges$xmax
