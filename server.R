@@ -2,8 +2,6 @@ library(shiny)
 library(tdmsreader)
 library(futile.logger)
 
-flog.threshold(DEBUG)
-
 # open file
 shinyServer(function(input, output) {
 
@@ -18,13 +16,13 @@ shinyServer(function(input, output) {
     })
 
     ranges <- reactiveValues(xmin = 0, xmax = 1)
-	observeEvent(input$plot_brush, {
-		brush <- input$plot_brush
-		if (!is.null(brush)) {
-			ranges$xmin <- brush$xmin
+    observeEvent(input$plot_brush, {
+        brush <- input$plot_brush
+        if (!is.null(brush)) {
+            ranges$xmin <- brush$xmin
             ranges$xmax <- brush$xmax
-		}
-	})
+        }
+    })
     observeEvent(input$sliderRange, {
         ranges$xmin <- input$sliderRange[1]
         ranges$xmax <- input$sliderRange[2]
@@ -66,8 +64,8 @@ shinyServer(function(input, output) {
         }
         datatable <- dataInput()
         l = list()
-        for(elt in ls(datatable$objects)) {
-            if(datatable$objects[[elt]]$has_data) {
+        for (elt in ls(datatable$objects)) {
+            if (datatable$objects[[elt]]$has_data) {
                 l[[elt]] = elt
             }
         }
