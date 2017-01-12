@@ -13,12 +13,17 @@ shinyUI(fluidPage(
       uiOutput("dirs"),
       uiOutput("datasets"),
       uiOutput("objects"),
-      actionButton("zoomIn", label = "+"),
-      actionButton("zoomOut", label = "-")
+      p("TDMS file properties"),
+      verbatimTextOutput("distProperties"),
+      p("TDMS channel properties"),
+      verbatimTextOutput("distChannel")
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
+      p("Zoom in/Zoom out"),
+      actionButton("zoomIn", label = "+"),
+      actionButton("zoomOut", label = "-"),
       uiOutput("sliderRange"),
       plotOutput("distPlot",
         brush = brushOpts(

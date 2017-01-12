@@ -83,6 +83,31 @@ shinyServer(function(input, output, session) {
         sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001, width="100%", round=T)
     })
 
+    output$distProperties <- renderPrint({
+        if (is.null(input$object)) {
+            return()
+        }
+
+        datatable <- dataInput()
+        r = datatable$objects[['/']]
+        for(prop in ls(r$properties)) {
+            cat(paste(prop, ': ', r$properties[[prop]],'\n'))
+        }
+    })
+
+    output$distChannel <- renderPrint({
+        if (is.null(input$object)) {
+            return()
+        }
+
+        datatable <- dataInput()
+        r = datatable$objects[[input$object]]
+        for(prop in ls(r$properties)) {
+            cat(paste(prop, ': ', r$properties[[prop]],'\n'))
+        }
+    })
+
+
     output$distPlot <- renderPlot({
         if (is.null(input$object)) {
             return()
@@ -99,7 +124,6 @@ shinyServer(function(input, output, session) {
         t = r$time_track(start = s, end = e)
         s = r$data
         close(my_file)
-        print("Plotting")
 
         plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
     })
