@@ -30,8 +30,9 @@ shinyServer(function(input, output, session) {
     observeEvent(input$zoomIn, {
         t1 = ranges$xmax
         t2 = ranges$xmin
-        ranges$xmin = t2 + (t1 - t2) / 3
-        ranges$xmax = t1 - (t1 - t2) / 3
+        a = t2 + (t1 - t2) / 3
+        b = t1 - (t1 - t2) / 3
+        updateSliderInput(session, "sliderRange", value = c(a, b))
     })
 
     observeEvent(input$zoomOut, {
@@ -40,8 +41,9 @@ shinyServer(function(input, output, session) {
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        ranges$xmin = max(t2 - (t1 - t2) / 2, 0)
-        ranges$xmax = min(t1 + (t1 - t2) / 2, max)
+        a = max(t2 - (t1 - t2) / 2, 0)
+        b = min(t1 + (t1 - t2) / 2, max)
+        updateSliderInput(session, "sliderRange", value = c(a, b))
     })
 
     output$dirs <- renderUI({
@@ -97,6 +99,7 @@ shinyServer(function(input, output, session) {
         t = r$time_track(start = s, end = e)
         s = r$data
         close(my_file)
+        print("Plotting")
 
         plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
     })
