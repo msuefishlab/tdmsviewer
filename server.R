@@ -3,9 +3,7 @@ library(tdmsreader)
 library(futile.logger)
 
 # open file
-shinyServer(function(input, output) {
-
-
+shinyServer(function(input, output, session) {
     dataInput <- reactive({
         withProgress(message = 'Loading...', value = 0, {
             my_file = file(paste0(input$dir, '/', input$dataset), "rb")
@@ -16,25 +14,26 @@ shinyServer(function(input, output) {
     })
 
     ranges <- reactiveValues(xmin = 0, xmax = 1)
+
     observeEvent(input$plot_brush, {
         brush <- input$plot_brush
         if (!is.null(brush)) {
-            ranges$xmin <- brush$xmin
-            ranges$xmax <- brush$xmax
+            updateSliderInput(session, "sliderRange", value = c(brush$xmin, brush$xmax))
         }
     })
+
     observeEvent(input$sliderRange, {
-        if(abs(ranges$xmin - input$sliderRange[1])>0.1 || abs(ranges$xmax - input$sliderRange[2])>0.1) {
-            ranges$xmin <- input$sliderRange[1]
-            ranges$xmax <- input$sliderRange[2]
-        }
+        ranges$xmin <- input$sliderRange[1]
+        ranges$xmax <- input$sliderRange[2]
     })
+
     observeEvent(input$zoomIn, {
         t1 = ranges$xmax
         t2 = ranges$xmin
         ranges$xmin = t2 + (t1 - t2) / 3
         ranges$xmax = t1 - (t1 - t2) / 3
     })
+
     observeEvent(input$zoomOut, {
         t1 = ranges$xmax
         t2 = ranges$xmin
@@ -45,12 +44,10 @@ shinyServer(function(input, output) {
         ranges$xmax = min(t1 + (t1 - t2) / 2, max)
     })
 
-
     output$dirs <- renderUI({
         dirs = list.files('data', full.names = T)
         selectInput("dir", "Data group", dirs)
     })
-
 
     output$datasets <- renderUI({
         if (is.null(input$dir)) {
@@ -81,7 +78,7 @@ shinyServer(function(input, output) {
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001)
+        sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001, width="100%", round=T)
     })
 
     output$distPlot <- renderPlot({

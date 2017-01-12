@@ -13,13 +13,13 @@ shinyUI(fluidPage(
       uiOutput("dirs"),
       uiOutput("datasets"),
       uiOutput("objects"),
-      uiOutput("sliderRange"),
       actionButton("zoomIn", label = "+"),
       actionButton("zoomOut", label = "-")
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
+      uiOutput("sliderRange"),
       plotOutput("distPlot",
         brush = brushOpts(
           id = "plot_brush",
