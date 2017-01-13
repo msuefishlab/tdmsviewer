@@ -1,12 +1,19 @@
 library(shiny)
+library(shinyFiles)
 library(tdmsreader)
 library(futile.logger)
 
+
+myhome = '~'
 # open file
 shinyServer(function(input, output, session) {
+
+    shinyDirChoose(input, 'dir', session = session, roots = c(home = myhome))
+
     dataInput <- reactive({
         withProgress(message = 'Loading...', value = 0, {
-            my_file = file(paste0(input$dir, '/', input$dataset), "rb")
+            mydir = paste0(c(myhome, unlist(input$dir$path)),collapse='/')
+            my_file = file(paste0(mydir, '/', input$dataset), "rb")
             x = TdmsFile$new(my_file)
             close(my_file)
             return (x)
@@ -46,16 +53,13 @@ shinyServer(function(input, output, session) {
         updateSliderInput(session, "sliderRange", value = c(a, b))
     })
 
-    output$dirs <- renderUI({
-        dirs = list.files('data', full.names = T)
-        selectInput("dir", "Data group", dirs)
-    })
-
     output$datasets <- renderUI({
         if (is.null(input$dir)) {
             return()
         }
-        tdmss = list.files(input$dir, pattern = ".tdms$")
+
+        mydir = paste0(c('~', unlist(input$dir$path)),collapse='/')
+        tdmss = list.files(mydir, pattern = ".tdms$")
         selectInput("dataset", "TDMS File", tdmss)
     })
 
@@ -83,29 +87,6 @@ shinyServer(function(input, output, session) {
         sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001, width="100%", round=T)
     })
 
-    output$distProperties <- renderPrint({
-        if (is.null(input$object)) {
-            return()
-        }
-
-        datatable <- dataInput()
-        r = datatable$objects[['/']]
-        for(prop in ls(r$properties)) {
-            cat(paste(prop, ': ', r$properties[[prop]],'\n'))
-        }
-    })
-
-    output$distChannel <- renderPrint({
-        if (is.null(input$object)) {
-            return()
-        }
-
-        datatable <- dataInput()
-        r = datatable$objects[[input$object]]
-        for(prop in ls(r$properties)) {
-            cat(paste(prop, ': ', r$properties[[prop]],'\n'))
-        }
-    })
 
 
     output$distPlot <- renderPlot({
@@ -116,7 +97,8 @@ shinyServer(function(input, output, session) {
         s = ranges$xmin
         e = ranges$xmax
 
-        my_file = file(paste0(input$dir, '/', input$dataset), "rb")
+        mydir = paste0(c(myhome, unlist(input$dir$path)),collapse='/')
+        my_file = file(paste0(mydir, '/', input$dataset), "rb")
         main = TdmsFile$new(my_file)
         main$read_data(my_file, s, e)
 
@@ -126,5 +108,35 @@ shinyServer(function(input, output, session) {
         close(my_file)
 
         plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
+    })
+
+
+    output$distProperties <- renderText({
+        if (is.null(input$object)) {
+            return()
+        }
+
+        datatable <- dataInput()
+        r = datatable$objects[['/']]
+
+        mytext = ''
+        for(prop in ls(r$properties)) {
+            mytext = paste(mytext, prop, ': ', r$properties[[prop]],'\n')
+        }
+        mytext
+    })
+
+    output$distChannel <- renderText({
+        if (is.null(input$object)) {
+            return()
+        }
+
+        datatable <- dataInput()
+        r = datatable$objects[[input$object]]
+        mytext = ''
+        for(prop in ls(r$properties)) {
+            mytext = paste(mytext, prop, ': ', r$properties[[prop]],'\n')
+        }
+        mytext
     })
 })

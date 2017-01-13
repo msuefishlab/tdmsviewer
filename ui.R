@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyFiles)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -10,7 +11,7 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
       p("Use the slider to extend range of the plot or click-and-drag your mouse over an area of the plot to zoom in"),
-      uiOutput("dirs"),
+      shinyDirButton('dir', label='Directory select', title='Please select a directory'),
       uiOutput("datasets"),
       uiOutput("objects"),
       p("TDMS file properties"),
