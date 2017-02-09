@@ -7,6 +7,8 @@ Programs for seeking and analyzing LabVIEW tdms files
 R packages:
 
 - shiny
+- shinyFiles
+- futile.logger
 - tdmsreader
 
 Note: tdmsreader is not currently an official R package so it is recommended to first install the package `devtools` and then run `devtools::install_github('msuefishlab/tdmsreader')`
