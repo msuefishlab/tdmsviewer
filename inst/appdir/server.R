@@ -1,69 +1,61 @@
-library(shiny)
-library(shinyFiles)
-library(tdmsreader)
-library(futile.logger)
+shiny::shinyServer(function(input, output, session) {
+    shinyFiles::shinyDirChoose(input, 'dir', session = session, roots = c(home = .baseDir))
 
-
-# open file
-shinyServer(function(input, output, session) {
-
-    shinyDirChoose(input, 'dir', session = session, roots = c(home = .baseDir))
-
-    dataInput <- reactive({
-        withProgress(message = 'Loading...', value = 0, {
+    dataInput = shiny::reactive({
+        shiny::withProgress(message = 'Loading...', value = 0, {
             myDir = do.call(file.path, c(.baseDir, input$dir$path))
             myFilePath = file.path(myDir, input$dataset)
             if (!file.exists(myFilePath)) {
                 return (NULL)
             }
             myFile = file(myFilePath, "rb")
-            tdmsFile = TdmsFile$new(myFile)
+            tdmsFile = tdmsreader::TdmsFile$new(myFile)
             close(myFile)
             return (tdmsFile)
         })
     })
 
-    ranges <- reactiveValues(xmin = 0, xmax = 1)
+    ranges = shiny::reactiveValues(xmin = 0, xmax = 1)
 
-    observeEvent(input$plot_brush, {
-        brush <- input$plot_brush
+    shiny::observeEvent(input$plot_brush, {
+        brush = input$plot_brush
         if (!is.null(brush)) {
-            updateSliderInput(session, "sliderRange", value = c(brush$xmin, brush$xmax))
+            shiny::updateSliderInput(session, "sliderRange", value = c(brush$xmin, brush$xmax))
         }
     })
 
-    observeEvent(input$sliderRange, {
-        ranges$xmin <- input$sliderRange[1]
-        ranges$xmax <- input$sliderRange[2]
+    shiny::observeEvent(input$sliderRange, {
+        ranges$xmin = input$sliderRange[1]
+        ranges$xmax = input$sliderRange[2]
     })
 
-    observeEvent(input$moveRight, {
+    shiny::observeEvent(input$moveRight, {
         if (is.null(input$dataset)) {
             return()
         }
         t1 = ranges$xmax
         t2 = ranges$xmin
-        datatable <- dataInput()
+        datatable = dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
         a = max(t2 + (t1 - t2) / 2, 0)
         b = min(t1 + (t1 - t2) / 2, max)
-        updateSliderInput(session, "sliderRange", value = c(a, b))
+        shiny::updateSliderInput(session, "sliderRange", value = c(a, b))
     })
-    observeEvent(input$moveLeft, {
+    shiny::observeEvent(input$moveLeft, {
         if (is.null(input$dataset)) {
             return()
         }
         t1 = ranges$xmax
         t2 = ranges$xmin
-        datatable <- dataInput()
+        datatable = dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
         a = max(t2 - (t1 - t2) / 2, 0)
         b = min(t1 - (t1 - t2) / 2, max)
-        updateSliderInput(session, "sliderRange", value = c(a, b))
+        shiny::updateSliderInput(session, "sliderRange", value = c(a, b))
     })
-    observeEvent(input$zoomIn, {
+    shiny::observeEvent(input$zoomIn, {
         if (is.null(input$dataset)) {
             return()
         }
@@ -71,24 +63,24 @@ shinyServer(function(input, output, session) {
         t2 = ranges$xmin
         a = t2 + (t1 - t2) / 3
         b = t1 - (t1 - t2) / 3
-        updateSliderInput(session, "sliderRange", value = c(a, b))
+        shiny::updateSliderInput(session, "sliderRange", value = c(a, b))
     })
 
-    observeEvent(input$zoomOut, {
+    shiny::observeEvent(input$zoomOut, {
         if (is.null(input$dataset)) {
             return()
         }
         t1 = ranges$xmax
         t2 = ranges$xmin
-        datatable <- dataInput()
+        datatable = dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
         a = max(t2 - (t1 - t2) / 2, 0)
         b = min(t1 + (t1 - t2) / 2, max)
-        updateSliderInput(session, "sliderRange", value = c(a, b))
+        shiny::updateSliderInput(session, "sliderRange", value = c(a, b))
     })
 
-    output$datasets <- renderUI({
+    output$datasets = renderUI({
         if (is.null(input$dir)) {
             return()
         }
@@ -100,39 +92,39 @@ shinyServer(function(input, output, session) {
 
         tdmss = list.files(myDir, pattern = ".tdms$")
         if (length(tdmss) == 0) {
-            showModal(modalDialog("No TDMS files found in folder"))
+            shiny::showModal(shiny::modalDialog("No TDMS files found in folder"))
             return()
         }
-        selectInput("dataset", "TDMS File", tdmss)
+        shiny::selectInput("dataset", "TDMS File", tdmss)
     })
 
-    output$objects <- renderUI({
+    output$objects = shiny::renderUI({
         if (is.null(input$dataset)) {
             return()
         }
-        datatable <- dataInput()
+        datatable = dataInput()
         l = list()
         for (elt in ls(datatable$objects)) {
             if (datatable$objects[[elt]]$has_data) {
                 l[[elt]] = elt
             }
         }
-        selectInput("object", "TDMS Object", l)
+        shiny::selectInput("object", "TDMS Object", l)
     })
 
-    output$sliderRange <- renderUI({
+    output$sliderRange = renderUI({
         if (is.null(input$object)) {
             return()
         }
-        datatable <- dataInput()
+        datatable = dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001, width = "100%", round = T)
+        shiny::sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001, width = "100%", round = T)
     })
 
 
 
-    output$distPlot <- renderPlot({
+    output$distPlot = renderPlot({
         if (is.null(input$object)) {
             return()
         }
@@ -146,7 +138,7 @@ shinyServer(function(input, output, session) {
         if (!file.exists(myFilePath)) {
             return()
         }
-        main = TdmsFile$new(myFile)
+        main = tdmsreader::TdmsFile$new(myFile)
         main$read_data(myFile, s, e)
 
         r = main$objects[[input$object]]
@@ -158,12 +150,12 @@ shinyServer(function(input, output, session) {
     })
 
 
-    output$distProperties <- renderText({
+    output$distProperties = shiny::renderText({
         if (is.null(input$object)) {
             return()
         }
 
-        datatable <- dataInput()
+        datatable = dataInput()
         r = datatable$objects[['/']]
 
         mytext = ''
@@ -173,12 +165,12 @@ shinyServer(function(input, output, session) {
         mytext
     })
 
-    output$distChannel <- renderText({
+    output$distChannel = shiny::renderText({
         if (is.null(input$object)) {
             return()
         }
 
-        datatable <- dataInput()
+        datatable = dataInput()
         r = datatable$objects[[input$object]]
         mytext = ''
         for (prop in ls(r$properties)) {
