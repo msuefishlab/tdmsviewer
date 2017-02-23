@@ -4,19 +4,18 @@ library(tdmsreader)
 library(futile.logger)
 
 
-myHome = '~'
-
 # open file
 shinyServer(function(input, output, session) {
 
-    shinyDirChoose(input, 'dir', session = session, roots = c(home = myHome))
+    shinyDirChoose(input, 'dir', session = session, roots = c(home = .baseDir))
 
     dataInput <- reactive({
         withProgress(message = 'Loading...', value = 0, {
-            myDir = do.call(file.path, c(myHome, input$dir$path))
+            myDir = do.call(file.path, c(.baseDir, input$dir$path))
             myFilePath = file.path(myDir, input$dataset)
-            print(myDir)
-            print(myFilePath)
+            if (!file.exists(myFilePath)) {
+                return (NULL)
+            }
             myFile = file(myFilePath, "rb")
             tdmsFile = TdmsFile$new(myFile)
             close(myFile)
@@ -61,12 +60,17 @@ shinyServer(function(input, output, session) {
         if (is.null(input$dir)) {
             return()
         }
-        print(input$dir)
 
-        myDir = do.call(file.path, c(myHome, input$dir$path))
-        print(myDir)
+        myDir = do.call(file.path, c(.baseDir, input$dir$path))
+        if (!file.exists(myDir)){
+            return()
+        }
 
         tdmss = list.files(myDir, pattern = ".tdms$")
+        if (length(tdmss) == 0) {
+            showModal(modalDialog("No TDMS files found in folder"))
+            return()
+        }
         selectInput("dataset", "TDMS File", tdmss)
     })
 
@@ -104,8 +108,12 @@ shinyServer(function(input, output, session) {
         s = ranges$xmin
         e = ranges$xmax
 
-        myDir = do.call(file.path, c(myHome, input$dir$path))
-        myFile = file(file.path(myDir, input$dataset), "rb")
+        myDir = do.call(file.path, c(.baseDir, input$dir$path))
+        myFilePath = file.path(myDir, input$dataset)
+        myFile = file(myFilePath, "rb")
+        if (!file.exists(myFilePath)) {
+            return()
+        }
         main = TdmsFile$new(myFile)
         main$read_data(myFile, s, e)
 

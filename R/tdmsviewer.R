@@ -9,13 +9,15 @@
 #' }
 
 #' @export
-tdmsviewer <- function() {
-    runTdmsViewer()
+tdmsviewer <- function(baseDir = '~') {
+    runTdmsViewer(baseDir)
     return(invisible())
 }
 
 
-runTdmsViewer <- function(args, baseDir){
+runTdmsViewer <- function(baseDir){
+    .GlobalEnv$.baseDir <- baseDir
+    on.exit(rm(.baseDir, envir = .GlobalEnv))
     filename <-  base::system.file("appdir", package = "tdmsviewer")
     shiny::runApp(filename, launch.browser = TRUE)
 }
