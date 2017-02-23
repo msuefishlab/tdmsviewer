@@ -25,6 +25,8 @@ shinyUI(fluidPage(
       p("Zoom in/Zoom out"),
       actionButton("zoomIn", label = "+"),
       actionButton("zoomOut", label = "-"),
+      actionButton("moveLeft", label = "<"),
+      actionButton("moveRight", label = ">"),
       uiOutput("sliderRange"),
       plotOutput("distPlot",
         brush = brushOpts(

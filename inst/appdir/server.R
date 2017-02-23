@@ -37,7 +37,36 @@ shinyServer(function(input, output, session) {
         ranges$xmax <- input$sliderRange[2]
     })
 
+    observeEvent(input$moveRight, {
+        if (is.null(input$dataset)) {
+            return()
+        }
+        t1 = ranges$xmax
+        t2 = ranges$xmin
+        datatable <- dataInput()
+        r = datatable$objects[[input$object]]
+        max = r$number_values * r$properties[['wf_increment']]
+        a = max(t2 + (t1 - t2) / 2, 0)
+        b = min(t1 + (t1 - t2) / 2, max)
+        updateSliderInput(session, "sliderRange", value = c(a, b))
+    })
+    observeEvent(input$moveLeft, {
+        if (is.null(input$dataset)) {
+            return()
+        }
+        t1 = ranges$xmax
+        t2 = ranges$xmin
+        datatable <- dataInput()
+        r = datatable$objects[[input$object]]
+        max = r$number_values * r$properties[['wf_increment']]
+        a = max(t2 - (t1 - t2) / 2, 0)
+        b = min(t1 - (t1 - t2) / 2, max)
+        updateSliderInput(session, "sliderRange", value = c(a, b))
+    })
     observeEvent(input$zoomIn, {
+        if (is.null(input$dataset)) {
+            return()
+        }
         t1 = ranges$xmax
         t2 = ranges$xmin
         a = t2 + (t1 - t2) / 3
@@ -46,6 +75,9 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$zoomOut, {
+        if (is.null(input$dataset)) {
+            return()
+        }
         t1 = ranges$xmax
         t2 = ranges$xmin
         datatable <- dataInput()
