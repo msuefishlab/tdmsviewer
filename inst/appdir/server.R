@@ -4,7 +4,8 @@ library(tdmsreader)
 library(futile.logger)
 
 
-myhome = '~'
+myhome = '/'
+
 # open file
 shinyServer(function(input, output, session) {
 
@@ -12,8 +13,10 @@ shinyServer(function(input, output, session) {
 
     dataInput <- reactive({
         withProgress(message = 'Loading...', value = 0, {
-            mydir = paste0(c(myhome, unlist(input$dir$path)),collapse='/')
-            my_file = file(paste0(mydir, '/', input$dataset), "rb")
+            print(input$dir$path)
+            print(file.path(input$dir$path))
+            mydir = (file.path(input$dir$path))
+            my_file = file(file.path(mydir, input$dataset), "rb")
             x = TdmsFile$new(my_file)
             close(my_file)
             return (x)
