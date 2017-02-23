@@ -4,22 +4,20 @@ library(tdmsreader)
 library(futile.logger)
 
 
-myhome = '/'
+myHome = '/'
 
 # open file
 shinyServer(function(input, output, session) {
 
-    shinyDirChoose(input, 'dir', session = session, roots = c(home = myhome))
+    shinyDirChoose(input, 'dir', session = session, roots = c(home = myHome))
 
     dataInput <- reactive({
         withProgress(message = 'Loading...', value = 0, {
-            print(input$dir$path)
-            print(file.path(input$dir$path))
-            mydir = (file.path(input$dir$path))
-            my_file = file(file.path(mydir, input$dataset), "rb")
-            x = TdmsFile$new(my_file)
-            close(my_file)
-            return (x)
+            myDir = do.call(file.path, c(myHome, input$dir$path))
+            myFile = file(file.path(myDir, input$dataset), "rb")
+            tdmsFile = TdmsFile$new(my_file)
+            close(myFile)
+            return (tdmsFile)
         })
     })
 
@@ -61,8 +59,8 @@ shinyServer(function(input, output, session) {
             return()
         }
 
-        mydir = paste0(c('~', unlist(input$dir$path)),collapse='/')
-        tdmss = list.files(mydir, pattern = ".tdms$")
+        myDir = do.call(file.path, c(myHome, input$dir$path))
+        tdmss = list.files(myDir, pattern = ".tdms$")
         selectInput("dataset", "TDMS File", tdmss)
     })
 
@@ -87,7 +85,7 @@ shinyServer(function(input, output, session) {
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001, width="100%", round=T)
+        sliderInput("sliderRange", "Range", min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001, width = "100%", round = T)
     })
 
 
@@ -100,15 +98,15 @@ shinyServer(function(input, output, session) {
         s = ranges$xmin
         e = ranges$xmax
 
-        mydir = paste0(c(myhome, unlist(input$dir$path)),collapse='/')
-        my_file = file(paste0(mydir, '/', input$dataset), "rb")
-        main = TdmsFile$new(my_file)
-        main$read_data(my_file, s, e)
+        myDir = do.call(file.path, c(myHome, input$dir$path))
+        myFile = file(file.path(myDir, input$dataset), "rb")
+        main = TdmsFile$new(myFile)
+        main$read_data(myFile, s, e)
 
         r = main$objects[[input$object]]
         t = r$time_track(start = s, end = e)
         s = r$data
-        close(my_file)
+        close(myFile)
 
         plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
     })
@@ -123,8 +121,8 @@ shinyServer(function(input, output, session) {
         r = datatable$objects[['/']]
 
         mytext = ''
-        for(prop in ls(r$properties)) {
-            mytext = paste(mytext, prop, ': ', r$properties[[prop]],'\n')
+        for (prop in ls(r$properties)) {
+            mytext = paste(mytext, prop, ': ', r$properties[[prop]], '\n')
         }
         mytext
     })
@@ -137,8 +135,8 @@ shinyServer(function(input, output, session) {
         datatable <- dataInput()
         r = datatable$objects[[input$object]]
         mytext = ''
-        for(prop in ls(r$properties)) {
-            mytext = paste(mytext, prop, ': ', r$properties[[prop]],'\n')
+        for (prop in ls(r$properties)) {
+            mytext = paste(mytext, prop, ': ', r$properties[[prop]], '\n')
         }
         mytext
     })
