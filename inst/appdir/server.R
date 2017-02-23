@@ -4,7 +4,7 @@ library(tdmsreader)
 library(futile.logger)
 
 
-myHome = '/'
+myHome = '~'
 
 # open file
 shinyServer(function(input, output, session) {
@@ -14,8 +14,11 @@ shinyServer(function(input, output, session) {
     dataInput <- reactive({
         withProgress(message = 'Loading...', value = 0, {
             myDir = do.call(file.path, c(myHome, input$dir$path))
-            myFile = file(file.path(myDir, input$dataset), "rb")
-            tdmsFile = TdmsFile$new(my_file)
+            myFilePath = file.path(myDir, input$dataset)
+            print(myDir)
+            print(myFilePath)
+            myFile = file(myFilePath, "rb")
+            tdmsFile = TdmsFile$new(myFile)
             close(myFile)
             return (tdmsFile)
         })
@@ -58,8 +61,11 @@ shinyServer(function(input, output, session) {
         if (is.null(input$dir)) {
             return()
         }
+        print(input$dir)
 
         myDir = do.call(file.path, c(myHome, input$dir$path))
+        print(myDir)
+
         tdmss = list.files(myDir, pattern = ".tdms$")
         selectInput("dataset", "TDMS File", tdmss)
     })

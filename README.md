@@ -2,25 +2,17 @@
 
 Programs for seeking and analyzing LabVIEW tdms files
 
-## Prerequisites
+## Install
 
-R packages:
 
-- shiny
-- shinyFiles
-- futile.logger
-- tdmsreader
+    install.packages('devtools')
+    devtools::install_github('msuefishlab/tdmsviewer')
 
-Note: tdmsreader is not currently an official R package so it is recommended to first install the package `devtools` and then run `devtools::install_github('msuefishlab/tdmsreader')`
+## Run server
 
-## Start server
 
-Execute the command
-
-- Rscript -e 'shiny::runApp()'
-
-Alternatively open the ui.R and server.R files in RStudio and click 'Run app'
-
+    library(tdmsreader)
+    tdmsreader()
 
 ## Usage
 

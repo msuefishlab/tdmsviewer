@@ -13,8 +13,10 @@ Imports:
     data.table (>= 1.10.0),
     shiny (>= 0.14.2),
     shinyFiles (>= 0.6.2),
+    tdmsreader (>= 0.0.1),
 Suggests:
     testthat
+Remotes: msuefishlab/tdmsreader
 License: MIT
 Encoding: UTF-8
 RoxygenNote: 6.0.1.9000
