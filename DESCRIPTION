@@ -7,9 +7,9 @@ Authors@R: c(
 Maintainer: Colin Diesh <dieshcol@msu.edu>
 Description: tdmsviewer is a RStudio shiny application to view TDMS files
 Depends:
-    R (>= 3.3.1)
+    R (>= 3.2.3)
 Imports:
-    tools (>= 3.3.1),
+    tools (>= 3.2.3),
     data.table (>= 1.10.0),
     shiny (>= 0.14.2),
     shinyFiles (>= 0.6.2),
