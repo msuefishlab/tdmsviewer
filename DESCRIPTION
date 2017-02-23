@@ -1,0 +1,20 @@
+Package: tdmsviewer
+Type: Package
+Title: View TDMS files as a RShiny app
+Version: 0.1.0
+Authors@R: c(
+    person("Colin", "Diesh", email = "dieshcol@msu.edu", role = c("cre", "aut")))
+Maintainer: Colin Diesh <dieshcol@msu.edu>
+Description: tdmsviewer is a RStudio shiny application to view TDMS files
+Depends:
+    R (>= 3.3.1)
+Imports:
+    tools (>= 3.3.1),
+    data.table (>= 1.10.0),
+    shiny (>= 0.14.2),
+    shinyFiles (>= 0.6.2),
+Suggests:
+    testthat
+License: MIT
+Encoding: UTF-8
+RoxygenNote: 6.0.1.9000
