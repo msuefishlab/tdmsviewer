@@ -11,8 +11,8 @@ Programs for seeking and analyzing LabVIEW tdms files
 ## Run server
 
 
-    library(tdmsreader)
-    tdmsreader()
+    library(tdmsviewer)
+    tdmsviewer()
 
 ## Usage
 
