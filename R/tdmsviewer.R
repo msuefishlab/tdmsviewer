@@ -8,6 +8,7 @@
 #' tdmsviewer(basedir='~')
 #' }
 #' @export
+#' @import shiny shinyFiles
 #' @param basedir Base directory for the file chooser
 
 
@@ -22,5 +23,5 @@ runTdmsViewer <- function(basedir){
     .GlobalEnv$basedir <- basedir
     on.exit(rm(basedir, envir = .GlobalEnv))
     filename <-  base::system.file("appdir", package = "tdmsviewer")
-    runApp(filename, launch.browser = TRUE)
+    shiny::runApp(filename, launch.browser = TRUE)
 }
