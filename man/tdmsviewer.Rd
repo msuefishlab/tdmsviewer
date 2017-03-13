@@ -4,7 +4,7 @@
 \alias{tdmsviewer}
 \title{Launch the tdmsviewer app}
 \usage{
-tdmsviewer()
+tdmsviewer(baseDir = "~")
 }
 \description{
 Executing this function will launch the tdmsviewer application in

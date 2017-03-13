@@ -1,3 +1,4 @@
+
 #' Launch the tdmsviewer app
 #'
 #' Executing this function will launch the tdmsviewer application in
@@ -7,6 +8,8 @@
 #' \dontrun{
 #' tdmsviewer()
 #' }
+#' @import shiny shinyFiles
+
 
 #' @export
 tdmsviewer <- function(baseDir = '~') {
@@ -19,5 +22,5 @@ runTdmsViewer <- function(baseDir){
     .GlobalEnv$.baseDir <- baseDir
     on.exit(rm(.baseDir, envir = .GlobalEnv))
     filename <-  base::system.file("appdir", package = "tdmsviewer")
-    shiny::runApp(filename, launch.browser = TRUE)
+    runApp(filename, launch.browser = TRUE)
 }
