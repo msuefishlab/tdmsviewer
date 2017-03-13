@@ -1,5 +1,7 @@
 # tdmsviewer
 
+[![Build Status](https://travis-ci.org/msuefishlab/tdmsviewer.svg?branch=master)](https://travis-ci.org/msuefishlab/tdmsviewer)
+
 Programs for seeking and analyzing LabVIEW tdms files
 
 ## Install
