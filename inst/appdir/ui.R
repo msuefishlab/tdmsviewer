@@ -5,7 +5,7 @@ shinyUI(fluidPage(
     sidebarLayout(
         sidebarPanel(
             p("Use the slider to extend range of the plot or click-and-drag your mouse over an area of the plot to zoom in"),
-            shinyDirButton('dir', label = 'Directory select', title = 'Please select a directory'),
+            shinyFiles::shinyDirButton('dir', label = 'Directory select', title = 'Please select a directory'),
             uiOutput("datasets"),
             uiOutput("objects"),
             p("TDMS file properties"),

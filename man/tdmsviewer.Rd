@@ -4,7 +4,10 @@
 \alias{tdmsviewer}
 \title{Launch the tdmsviewer app}
 \usage{
-tdmsviewer(baseDir = "~")
+tdmsviewer(basedir = "~")
+}
+\arguments{
+\item{basedir}{Base directory for the file chooser}
 }
 \description{
 Executing this function will launch the tdmsviewer application in
@@ -12,9 +15,6 @@ the user's default web browser.
 }
 \examples{
 \dontrun{
-tdmsviewer()
+tdmsviewer(basedir='~')
 }
-}
-\author{
-Colin Diesh \email{dieshcol@msu.edu}
 }

@@ -33,4 +33,4 @@ To interact with the TDMS data, you can use the following tools
 
 When installing on Windows, manually install shiny/RJSONIO first with `install.packages(c('shiny','RJSONIO'))`
 
-By default, the baseDir is the home directory '~' but you can adjust that with arguments to tdmsviewer(). On Windows, that you can run `tdmsviewer::tdmsviewer(baseDir = '~/..')` This gives access to Downloads folder, Desktop, etc.
+By default, the basedir is the home directory '~' but you can adjust that with arguments to tdmsviewer(). On Windows, that you can run `tdmsviewer(basedir = '~/..')` This gives access to Downloads folder, Desktop, etc.

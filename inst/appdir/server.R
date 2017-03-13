@@ -1,9 +1,9 @@
 shinyServer(function(input, output, session) {
-    shinyDirChoose(input, 'dir', session = session, roots = c(home = .baseDir))
+    shinyFiles::shinyDirChoose(input, 'dir', session = session, roots = c(home = basedir))
 
     dataInput = reactive({
         withProgress(message = 'Loading...', value = 0, {
-            myDir = do.call(file.path, c(.baseDir, input$dir$path))
+            myDir = do.call(file.path, c(basedir, input$dir$path))
             myFilePath = file.path(myDir, input$dataset)
             if (!file.exists(myFilePath)) {
                 return (NULL)
@@ -84,7 +84,7 @@ shinyServer(function(input, output, session) {
             return()
         }
 
-        myDir = do.call(file.path, c(.baseDir, input$dir$path))
+        myDir = do.call(file.path, c(basedir, input$dir$path))
         if (!file.exists(myDir)){
             return()
         }
@@ -131,7 +131,7 @@ shinyServer(function(input, output, session) {
         s = ranges$xmin
         e = ranges$xmax
 
-        myDir = do.call(file.path, c(.baseDir, input$dir$path))
+        myDir = do.call(file.path, c(basedir, input$dir$path))
         myFilePath = file.path(myDir, input$dataset)
         myFile = file(myFilePath, "rb")
         if (!file.exists(myFilePath)) {

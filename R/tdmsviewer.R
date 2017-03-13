@@ -3,24 +3,24 @@
 #'
 #' Executing this function will launch the tdmsviewer application in
 #' the user's default web browser.
-#' @author Colin Diesh \email{dieshcol@msu.edu}
 #' @examples
 #' \dontrun{
-#' tdmsviewer()
+#' tdmsviewer(basedir='~')
 #' }
-#' @import shiny shinyFiles
+#' @export
+#' @param basedir Base directory for the file chooser
 
 
 #' @export
-tdmsviewer <- function(baseDir = '~') {
-    runTdmsViewer(baseDir)
+tdmsviewer <- function(basedir = '~') {
+    runTdmsViewer(basedir)
     return(invisible())
 }
 
 
-runTdmsViewer <- function(baseDir){
-    .GlobalEnv$.baseDir <- baseDir
-    on.exit(rm(.baseDir, envir = .GlobalEnv))
+runTdmsViewer <- function(basedir){
+    .GlobalEnv$basedir <- basedir
+    on.exit(rm(basedir, envir = .GlobalEnv))
     filename <-  base::system.file("appdir", package = "tdmsviewer")
     runApp(filename, launch.browser = TRUE)
 }
