@@ -14,7 +14,9 @@ Programs for seeking and analyzing LabVIEW tdms files
 
 
     library(tdmsviewer)
-    tdmsviewer()
+    # basedir defaults to ~/
+    # the directory selector can look for tdms files in this subtree
+    tdmsviewer(basedir='~/tdms_files')
 
 ## Usage
 
