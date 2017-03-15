@@ -177,4 +177,10 @@ shinyServer(function(input, output, session) {
         }
         mytext
     })
+    observeEvent(input$dir, {
+        session$doBookmark()
+    })
+    onBookmarked(function(url) {
+        updateQueryString(url)
+    })
 })
