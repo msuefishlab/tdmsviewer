@@ -4,17 +4,19 @@
 \alias{tdmsviewer}
 \title{Launch the tdmsviewer app}
 \usage{
-tdmsviewer(basedir = "~")
+tdmsviewer(basedir = "~", dev = F)
 }
 \arguments{
-\item{basedir}{Base directory for the file chooser}
+\item{basedir}{Root directory for TDMS files. Default '~'}
+
+\item{dev}{Boolean if using dev environment, loads from local directories}
 }
 \description{
 Executing this function will launch the tdmsviewer application in
-the user's default web browser.
+with a given folder of TDMS files
 }
 \examples{
 \dontrun{
-tdmsviewer(basedir='~')
+tdmsviewer(basedir='/data/dir')
 }
 }
