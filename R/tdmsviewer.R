@@ -1,27 +1,20 @@
-
 #' Launch the tdmsviewer app
 #'
 #' Executing this function will launch the tdmsviewer application in
-#' the user's default web browser.
+#' with a given folder of TDMS files
 #' @examples
 #' \dontrun{
-#' tdmsviewer(basedir='~')
+#' tdmsviewer(basedir='/data/dir')
 #' }
 #' @export
-#' @import shiny shinyFiles
-#' @param basedir Base directory for the file chooser
-
-
-#' @export
-tdmsviewer <- function(basedir = '~') {
-    runTdmsViewer(basedir)
-    return(invisible())
-}
-
-
-runTdmsViewer <- function(basedir){
+#' @param basedir Root directory for TDMS files. Default '~'
+#' @param dev Boolean if using dev environment, loads from local directories
+tdmsviewer = function(basedir = '~', dev = F) {
     .GlobalEnv$basedir <- basedir
     on.exit(rm(basedir, envir = .GlobalEnv))
-    filename <-  base::system.file("appdir", package = "tdmsviewer")
-    shiny::runApp(filename, launch.browser = TRUE)
+    if (!dev) {
+        runApp(base::system.file("appdir", package = "tdmsviewer"))
+    } else {
+        runApp('inst/appdir')
+    }
 }
