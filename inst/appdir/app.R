@@ -1,3 +1,41 @@
+library(RSQLite)
+
+sqlitePath <- "~/sql.db"
+table <- "responses"
+
+
+
+# if file empty, create it
+if(!file.exists(sqlitePath)) {
+    print("HERE!")
+    db <- dbConnect(SQLite(), sqlitePath)
+    query <- "CREATE TABLE responses(start REAL, end REAL)"
+    dbGetQuery(db, query)
+    dbDisconnect(db)
+}
+
+saveData <- function(data) {
+    db <- dbConnect(SQLite(), sqlitePath)
+    query <- sprintf(
+        "INSERT INTO %s (%s) VALUES ('%s')",
+        table, 
+        paste(names(data), collapse = ", "),
+        paste(data, collapse = "', '")
+    )
+    dbGetQuery(db, query)
+    dbDisconnect(db)
+}
+
+
+loadData <- function() {
+    db <- dbConnect(SQLite(), sqlitePath)
+    query <- sprintf("SELECT * FROM %s", table)
+    data <- dbGetQuery(db, query)
+    dbDisconnect(db)
+    data
+}
+
+
 ui = function() {
     fluidPage(
         titlePanel("TDMS Viewer - Gallant Lab"),
@@ -29,7 +67,9 @@ ui = function() {
                         resetOnNew = T,
                         direction = "x"
                     )
-                )
+                ),
+                actionButton("saveView", label = "Save view"),
+                DT::dataTableOutput('saved')
             )
         )
     )
@@ -116,7 +156,9 @@ server = function(input, output, session) {
     })
 
     output$datasets = renderUI({
-        print(input$dir)
+        if(is.null(input$dir)) {
+            return()
+        }
         myDir = do.call(file.path, c(basedir, input$dir$path))
         if (!file.exists(myDir)){
             return()
@@ -211,13 +253,12 @@ server = function(input, output, session) {
         mytext
     })
 
-    observeEvent(input$dir, {
-        print('here')
-        session$doBookmark()
+    observeEvent(input$saveView, {
+        saveData(data.frame(start = ranges$xmin, end = ranges$xmax))
     })
-
-    onBookmarked(function(url) {
-        updateQueryString(url)
+    output$saved <- DT::renderDataTable({
+        input$saveView
+        loadData()
     })
 }
 
