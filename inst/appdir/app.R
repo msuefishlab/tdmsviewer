@@ -20,8 +20,8 @@ mserver = function(input, output, session) {
     source('page/home.R', local = T)
     source('page/saved.R', local = T)
     source('page/help.R', local = T)
-    callModule(homeServer, 'home')
-    callModule(savedServer, 'saved')
+    extrainput = callModule(homeServer, 'home')
+    callModule(savedServer, 'saved', extrainput)
     callModule(helpServer, 'help')
     observeEvent(input$inTabset, {
         session$doBookmark()
@@ -36,7 +36,9 @@ mserver = function(input, output, session) {
             'saved-table_search',
             'saved-table_rows_all',
             'saved-table_state',
-            'saved-table_rows_selected'
+            'saved-table_rows_selected',
+            'home-saveView',
+            'dir-modal'
         )
     )
 }

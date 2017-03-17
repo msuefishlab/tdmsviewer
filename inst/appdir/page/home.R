@@ -210,7 +210,10 @@ homeServer = function(input, output, session) {
     })
 
     observeEvent(input$saveView, {
-        saveData(ranges$xmin, ranges$xmax, input$object, input$dataset)
+        myDir = do.call(file.path, c(basedir, input$dir$path))
+        saveData(ranges$xmin, ranges$xmax, file.path(myDir, input$dataset), input$object)
     })
+
+    return (input)
 }
 
