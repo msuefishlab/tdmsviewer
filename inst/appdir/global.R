@@ -7,20 +7,15 @@ table <- "responses"
 # if file empty, create it
 if(!file.exists(sqlitePath)) {
     db <- dbConnect(SQLite(), sqlitePath)
-    query <- "CREATE TABLE responses(start REAL, end REAL, file VARCHAR(255), unique (start, end, file))"
+    query <- "CREATE TABLE responses(start REAL, end REAL, file TEXT, object TEXT, unique (start, end, file, object))"
     dbGetQuery(db, query)
     dbDisconnect(db)
 }
 
-saveData <- function(data) {
+saveData <- function(start, end, file, object) {
     db <- dbConnect(SQLite(), sqlitePath)
-    query <- sprintf(
-        "INSERT INTO %s (%s) VALUES ('%s')",
-        table, 
-        paste(names(data), collapse = ", "),
-        paste(data, collapse = "', '")
-    )
-    dbGetQuery(db, query)
+    query = sprintf("INSERT INTO %s ('start', 'end', 'file', 'object') VALUES (:start, :end, :file, :object)", table)
+    dbGetQuery(db, query, list(start=start, end=end, file=file, object=object))
     dbDisconnect(db)
 }
 

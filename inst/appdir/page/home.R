@@ -210,7 +210,7 @@ homeServer = function(input, output, session) {
     })
 
     observeEvent(input$saveView, {
-        saveData(data.frame(start = ranges$xmin, end = ranges$xmax))
+        saveData(ranges$xmin, ranges$xmax, input$object, input$dataset)
     })
 }
 
