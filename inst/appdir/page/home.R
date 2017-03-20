@@ -18,7 +18,8 @@ homeUI = function(id) {
             actionButton(ns('zoomOut'), label = '-'),
             actionButton(ns('moveLeft'), label = '<'),
             actionButton(ns('moveRight'), label = '>'),
-            actionButton(ns('saveView'), label = 'Save view'),
+            actionButton(ns('saveView'), label = 'Save peak in current view'),
+            actionButton(ns('saveInvertedView'), label = 'Save peak in current view (invert)'),
             uiOutput(ns('sliderOutput')),
             plotOutput(ns('distPlot'),
                 brush = brushOpts(
@@ -94,8 +95,8 @@ homeServer = function(input, output, session) {
         }
         t1 = ranges$xmax
         t2 = ranges$xmin
-        a = t2 + (t1 - t2) / 3
-        b = t1 - (t1 - t2) / 3
+        a = t2 + (t1 - t2) / 5
+        b = t1 - (t1 - t2) / 5
         updateSliderInput(session, 'sliderRange', value = c(a, b))
     })
 
@@ -108,8 +109,8 @@ homeServer = function(input, output, session) {
         datatable = dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        a = max(t2 - (t1 - t2) / 2, 0)
-        b = min(t1 + (t1 - t2) / 2, max)
+        a = max(t2 - (t1 - t2), 0)
+        b = min(t1 + (t1 - t2), max)
         updateSliderInput(session, 'sliderRange', value = c(a, b))
     })
 
@@ -222,6 +223,25 @@ homeServer = function(input, output, session) {
         mytext
     })
 
+    observeEvent(input$saveInvertedView, {
+        s = ranges$xmin
+        e = ranges$xmax
+
+        myDir = do.call(file.path, c(basedir, input$dir$path))
+        myFilePath = file.path(myDir, input$dataset)
+        myFile = file(myFilePath, 'rb')
+        if (!file.exists(myFilePath)) {
+            return()
+        }
+        main = tdmsreader::TdmsFile$new(myFile)
+        main$read_data(myFile, s, e)
+
+        r = main$objects[[input$object]]
+        t = r$time_track(start = s, end = e)
+        s = r$data
+        try(saveData(t[which.min(s)], file.path(myDir, input$dataset), input$object, 1))
+        close(myFile)
+    })
     observeEvent(input$saveView, {
         s = ranges$xmin
         e = ranges$xmax
@@ -238,7 +258,7 @@ homeServer = function(input, output, session) {
         r = main$objects[[input$object]]
         t = r$time_track(start = s, end = e)
         s = r$data
-        try(saveData(t[which.max(s)], file.path(myDir, input$dataset), input$object))
+        try(saveData(t[which.max(s)], file.path(myDir, input$dataset), input$object, 0))
         close(myFile)
     })
 

@@ -11,6 +11,7 @@ Depends:
 Imports:
     tools (>= 3.2.3),
     shiny (>= 0.14.2),
+    DT (>= 0.2),
     shinyFiles (>= 0.6.2),
     tdmsreader (>= 0.1.0),
     RSQLite (>= 1.1)

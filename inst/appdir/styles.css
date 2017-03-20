@@ -1,16 +1,8 @@
-
-@import url("//fonts.googleapis.com/css?family=Rubik");
-
-html, body {
-  font-family: 'Rubik';
-}
-
 h1 {
   font-weight: 500;
   line-height: 1.1;
   color: #ad1d28;
 }
-
 body {
     margin: 20px;
     background: #ccc;
