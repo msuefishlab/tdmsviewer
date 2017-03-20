@@ -6,9 +6,10 @@ homeUI = function(id) {
             shinyFiles::shinyDirButton(ns('dir'), label = 'Directory select', title = 'Please select a directory'),
             uiOutput(ns('datasets')),
             uiOutput(ns('objects')),
-            p('TDMS file properties'),
+            uiOutput('TDMS file properties'),
+            uiOutput(ns('distPropertiesLabel')),
             verbatimTextOutput(ns('distProperties')),
-            p('TDMS channel properties'),
+            uiOutput(ns('distChannelLabel')),
             verbatimTextOutput(ns('distChannel'))
         ),
         mainPanel(
@@ -95,6 +96,7 @@ homeServer = function(input, output, session) {
         t2 = ranges$xmin
         a = t2 + (t1 - t2) / 3
         b = t1 - (t1 - t2) / 3
+        updateSliderInput(session, 'sliderRange', value = c(a, b))
     })
 
     observeEvent(input$zoomOut, {
@@ -179,7 +181,12 @@ homeServer = function(input, output, session) {
         plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
     })
 
-
+    output$distPropertiesLabel = renderUI({
+        if (is.null(input$object)) {
+            return()
+        }
+        p('TDMS properties')
+    })
     output$distProperties = renderText({
         if (is.null(input$object)) {
             return()
@@ -193,6 +200,12 @@ homeServer = function(input, output, session) {
             mytext = paste(mytext, prop, ': ', r$properties[[prop]], '\n')
         }
         mytext
+    })
+    output$distChannelLabel = renderUI({
+        if (is.null(input$object)) {
+            return()
+        }
+        p('TDMS channel properties')
     })
 
     output$distChannel = renderText({
@@ -210,8 +223,23 @@ homeServer = function(input, output, session) {
     })
 
     observeEvent(input$saveView, {
+        s = ranges$xmin
+        e = ranges$xmax
+
         myDir = do.call(file.path, c(basedir, input$dir$path))
-        saveData(ranges$xmin, ranges$xmax, file.path(myDir, input$dataset), input$object)
+        myFilePath = file.path(myDir, input$dataset)
+        myFile = file(myFilePath, 'rb')
+        if (!file.exists(myFilePath)) {
+            return()
+        }
+        main = tdmsreader::TdmsFile$new(myFile)
+        main$read_data(myFile, s, e)
+
+        r = main$objects[[input$object]]
+        t = r$time_track(start = s, end = e)
+        s = r$data
+        try(saveData(t[which.max(s)], file.path(myDir, input$dataset), input$object))
+        close(myFile)
     })
 
     return (input)

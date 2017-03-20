@@ -9,19 +9,17 @@ savedUI = function(id) {
         mainPanel(
             p('Saved EODs'),
             DT::dataTableOutput(ns('table')),
+            sliderInput(ns('windowSize'), label = "Window size", value = 0.001, min = 0.000001, max = 0.1, step = 0.000001),
             plotOutput(ns('plot')),
             actionButton(ns('deleteButton'), 'Delete selected EOD')
         )
     )
 }
 savedServer = function(input, output, session, extrainput) {
-    data = reactive({
+    output$table = DT::renderDataTable({
         input$deleteButton
         extrainput$saveView
         loadData()
-    })
-    output$table = DT::renderDataTable({
-        data()
     })
 
     output$plot = renderPlot({
@@ -29,11 +27,13 @@ savedServer = function(input, output, session, extrainput) {
             return()
         }
         input$deleteButton
-        ret = data()
+        extrainput$saveView
+        
+        ret = loadData()
         ret = ret[input$table_rows_selected, ]
  
-        s = ret[1,]$start
-        e = ret[1,]$end
+        s = ret[1,]$start - input$windowSize/2
+        e = ret[1,]$start + input$windowSize/2
         myFilePath = ret[1,]$file
         myFile = file(myFilePath, 'rb')
         if (!file.exists(myFilePath)) {
@@ -52,9 +52,8 @@ savedServer = function(input, output, session, extrainput) {
         if(nrow(ret)>1) {
             for(i in 2:nrow(ret)) {
 
-                s = ret[i,]$start
-                e = ret[i,]$end
-                print(ret[i,])
+                s = ret[i,]$start - input$windowSize/2
+                e = ret[i,]$start + input$windowSize/2
 
                 myFilePath = ret[i,]$file
                 myFile = file(myFilePath, 'rb')
@@ -66,7 +65,6 @@ savedServer = function(input, output, session, extrainput) {
 
                 r = main$objects[[ret[i,]$object]]
                 t = r$time_track(start = s, end = e)
-                print(t)
                 t = t-t[1]
                 s = r$data
                 close(myFile)
@@ -77,9 +75,9 @@ savedServer = function(input, output, session, extrainput) {
     })
 
     observeEvent(input$deleteButton, {
-        ret = data()
+        ret = loadData()
         ret = ret[1,]
-        deleteData(ret$start, ret$end, ret$file, ret$object)
-    })
+        deleteData(ret$start, ret$file, ret$object)
+    }, priority = 1)
 }
 
