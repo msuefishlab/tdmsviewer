@@ -1,43 +1,41 @@
 
-homeUI = function(id) {
+homeSidebarUI = function(id) {
     ns = NS(id)
-    sidebarLayout(
-        sidebarPanel(
-            shinyFiles::shinyDirButton(ns('dir'), label = 'Directory select', title = 'Please select a directory'),
-            uiOutput(ns('datasets')),
-            uiOutput(ns('objects')),
-            uiOutput('TDMS file properties'),
-            uiOutput(ns('distPropertiesLabel')),
-            verbatimTextOutput(ns('distProperties')),
-            uiOutput(ns('distChannelLabel')),
-            verbatimTextOutput(ns('distChannel'))
-        ),
-        mainPanel(
-            p('Zoom in/Zoom out'),
-            actionButton(ns('zoomIn'), label = '+'),
-            actionButton(ns('zoomOut'), label = '-'),
-            actionButton(ns('moveLeft'), label = '<'),
-            actionButton(ns('moveRight'), label = '>'),
-            actionButton(ns('saveView'), label = 'Save peak in current view'),
-            actionButton(ns('saveInvertedView'), label = 'Save peak in current view (invert)'),
-            uiOutput(ns('sliderOutput')),
-            plotOutput(ns('distPlot'),
-                brush = brushOpts(
-                    id = ns('plot_brush'),
-                    resetOnNew = T,
-                    direction = 'x'
-                )
-            ),
-            DT::dataTableOutput(ns('saved'))
-        )
+    tagList(
+        uiOutput(ns('datasets')),
+        uiOutput(ns('objects')),
+        uiOutput('TDMS file properties'),
+        uiOutput(ns('distPropertiesLabel')),
+        verbatimTextOutput(ns('distProperties')),
+        uiOutput(ns('distChannelLabel')),
+        verbatimTextOutput(ns('distChannel'))
     )
 }
-homeServer = function(input, output, session) {
-    shinyFiles::shinyDirChoose(input, session$ns('dir'), session = session, roots = c(home = basedir))
-
+homeMainUI = function(id) {
+    ns = NS(id)
+    tagList(
+        p('Zoom in/Zoom out'),
+        actionButton(ns('zoomIn'), label = '+'),
+        actionButton(ns('zoomOut'), label = '-'),
+        actionButton(ns('moveLeft'), label = '<'),
+        actionButton(ns('moveRight'), label = '>'),
+        actionButton(ns('saveView'), label = 'Save peak in current view'),
+        actionButton(ns('saveInvertedView'), label = 'Save peak in current view (invert)'),
+        uiOutput(ns('sliderOutput')),
+        plotOutput(ns('distPlot'),
+            brush = brushOpts(
+                id = ns('plot_brush'),
+                resetOnNew = T,
+                direction = 'x'
+            )
+        ),
+        DT::dataTableOutput(ns('saved'))
+    )
+}
+homeServer = function(input, output, session, extrainput) {
     dataInput = reactive({
         withProgress(message = 'Loading...', value = 0, {
-            myDir = do.call(file.path, c(basedir, input$dir$path))
+            myDir = do.call(file.path, c(basedir, extrainput$dir$path))
             myFilePath = file.path(myDir, input$dataset)
             if (!file.exists(myFilePath)) {
                 return (NULL)
@@ -115,10 +113,10 @@ homeServer = function(input, output, session) {
     })
 
     output$datasets = renderUI({
-        if(is.null(input$dir)) {
+        if(is.null(extrainput$dir)) {
             return()
         }
-        myDir = do.call(file.path, c(basedir, input$dir$path))
+        myDir = do.call(file.path, c(basedir, extrainput$dir$path))
         if (!file.exists(myDir)){
             return()
         }
@@ -165,7 +163,7 @@ homeServer = function(input, output, session) {
         s = ranges$xmin
         e = ranges$xmax
 
-        myDir = do.call(file.path, c(basedir, input$dir$path))
+        myDir = do.call(file.path, c(basedir, extrainput$dir$path))
         myFilePath = file.path(myDir, input$dataset)
         myFile = file(myFilePath, 'rb')
         if (!file.exists(myFilePath)) {
@@ -227,7 +225,7 @@ homeServer = function(input, output, session) {
         s = ranges$xmin
         e = ranges$xmax
 
-        myDir = do.call(file.path, c(basedir, input$dir$path))
+        myDir = do.call(file.path, c(basedir, extrainput$dir$path))
         myFilePath = file.path(myDir, input$dataset)
         myFile = file(myFilePath, 'rb')
         if (!file.exists(myFilePath)) {
@@ -246,7 +244,7 @@ homeServer = function(input, output, session) {
         s = ranges$xmin
         e = ranges$xmax
 
-        myDir = do.call(file.path, c(basedir, input$dir$path))
+        myDir = do.call(file.path, c(basedir, extrainput$dir$path))
         myFilePath = file.path(myDir, input$dataset)
         myFile = file(myFilePath, 'rb')
         if (!file.exists(myFilePath)) {

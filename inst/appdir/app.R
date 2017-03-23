@@ -9,18 +9,29 @@ ui = function() {
         headerPanel('tdmsviewer'),
         wellPanel(style = 'background-color: #ffffff;', 
             tabsetPanel(id = 'inTabset',
-                tabPanel(style = 'margin: 20px;', id = 'home', 'Home', homeUI('home')),
+                tabPanel(style = 'margin: 20px;', id = 'home', 'Home',
+                    sidebarLayout(
+                        sidebarPanel(
+                            shinyFiles::shinyDirButton('dir', label = 'Directory select', title = 'Please select a directory'),
+                            homeSidebarUI('home')
+                        ),
+                        mainPanel(
+                            homeMainUI('home')
+                        )
+                    )
+                ),
                 tabPanel(style = 'margin: 20px;', id = 'saved', 'Saved EODs', savedUI('saved')),
                 tabPanel(style = 'margin: 20px;', id = 'help', 'Help', helpUI('help'))
             )
         )
     )
 }
-mserver = function(input, output, session) {
+server = function(input, output, session) {
+    shinyFiles::shinyDirChoose(input, 'dir', session = session, roots = c(home = basedir))
     source('page/home.R', local = T)
     source('page/saved.R', local = T)
     source('page/help.R', local = T)
-    extrainput = callModule(homeServer, 'home')
+    extrainput = callModule(homeServer, 'home', input)
     callModule(savedServer, 'saved', extrainput)
     callModule(helpServer, 'help')
     observeEvent(input$inTabset, {
@@ -43,4 +54,4 @@ mserver = function(input, output, session) {
     )
 }
 
-shinyApp(ui = ui, server = mserver, enableBookmarking = 'url')
+shinyApp(ui = ui, server = server, enableBookmarking = 'url')
