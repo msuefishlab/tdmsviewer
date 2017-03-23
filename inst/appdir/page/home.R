@@ -21,6 +21,8 @@ homeMainUI = function(id) {
         actionButton(ns('moveRight'), label = '>'),
         actionButton(ns('saveView'), label = 'Save peak in current view'),
         actionButton(ns('saveInvertedView'), label = 'Save peak in current view (invert)'),
+        actionButton(ns('saveAll'), label = 'Save all peaks in current view'),
+        actionButton(ns('saveInvertedAll'), label = 'Save all peaks in current view (inverted)'),
         uiOutput(ns('sliderOutput')),
         plotOutput(ns('distPlot'),
             brush = brushOpts(
@@ -29,7 +31,7 @@ homeMainUI = function(id) {
                 direction = 'x'
             )
         ),
-        DT::dataTableOutput(ns('saved'))
+        verbatimTextOutput(ns('saved'))
     )
 }
 homeServer = function(input, output, session, extrainput) {
@@ -174,10 +176,10 @@ homeServer = function(input, output, session, extrainput) {
 
         r = main$objects[[input$object]]
         t = r$time_track(start = s, end = e)
-        s = r$data
+        dat = r$data
         close(myFile)
 
-        plot(t, s, type = 'l', xlab = 'time', ylab = 'volts')
+        plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
     })
 
     output$distPropertiesLabel = renderUI({
@@ -236,8 +238,8 @@ homeServer = function(input, output, session, extrainput) {
 
         r = main$objects[[input$object]]
         t = r$time_track(start = s, end = e)
-        s = r$data
-        try(saveData(t[which.min(s)], file.path(myDir, input$dataset), input$object, 1))
+        dat = r$data
+        try(saveData(t[which.min(dat)], file.path(myDir, input$dataset), input$object, 1))
         close(myFile)
     })
     observeEvent(input$saveView, {
@@ -255,10 +257,44 @@ homeServer = function(input, output, session, extrainput) {
 
         r = main$objects[[input$object]]
         t = r$time_track(start = s, end = e)
-        s = r$data
-        try(saveData(t[which.max(s)], file.path(myDir, input$dataset), input$object, 0))
+        dat = r$data
+        try(saveData(t[which.max(dat)], file.path(myDir, input$dataset), input$object, 0))
         close(myFile)
     })
+    observeEvent(input$saveAll, {
+        s = ranges$xmin
+        e = ranges$xmax
+
+        myDir = do.call(file.path, c(basedir, extrainput$dir$path))
+        myFilePath = file.path(myDir, input$dataset)
+        myFile = file(myFilePath, 'rb')
+        if (!file.exists(myFilePath)) {
+            return()
+        }
+        main = tdmsreader::TdmsFile$new(myFile)
+        main$read_data(myFile, s, e)
+
+        r = main$objects[[input$object]]
+        t = r$time_track(start = s, end = e)
+        dat = r$data
+
+        mysd = sd(dat)
+
+        curr_time = 0
+        print("TESTING")
+        for(i in 1:length(dat)) {
+            if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - curr_time) > 0.001 & dat[i] > mysd * 3) {
+                ns = i - 1000
+                ne = i + 1000
+                print(sprintf("checking %f %f",ns,ne))
+                try(saveData(t[ns+which.max(dat[ns:ne])], file.path(myDir, input$dataset), input$object, 0))
+                curr_time = t[i]
+            }
+        }
+        
+        close(myFile)
+    })
+
 
     return (input)
 }

@@ -56,8 +56,11 @@ server = function(input, output, session) {
             'home-moveRight',
             'home-moveLeft',
             'home-zoomOut',
-            'home-zoonIn',
-            'saved-deleteButton'
+            'home-zoomIn',
+            'home-dataset',
+            'home-object',
+            'saved-deleteButton',
+            'home-plot_brush'
         )
     )
 }
