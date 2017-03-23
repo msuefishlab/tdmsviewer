@@ -49,7 +49,15 @@ server = function(input, output, session) {
             'saved-table_state',
             'saved-table_rows_selected',
             'home-saveView',
-            'dir-modal'
+            'dir-modal',
+            'dir',
+            'home-saveInvertedView',
+            'home-saveView',
+            'home-moveRight',
+            'home-moveLeft',
+            'home-zoomOut',
+            'home-zoonIn',
+            'saved-deleteButton'
         )
     )
 }

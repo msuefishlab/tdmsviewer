@@ -6,7 +6,8 @@ savedUI = function(id) {
             h2('Saved EODs'),
             p('Select one or multiple EOD selections to plot them on the same axis'),
             sliderInput(ns('windowSize'), label = 'Window size', value = 0.001, min = 0.000001, max = 0.1, step = 0.000001, width='200px'),
-            actionButton(ns('deleteButton'), 'Delete selected EOD(s)')
+            actionButton(ns('deleteButton'), 'Delete selected EOD(s)'),
+            checkboxInput(ns('normalize'), 'Normalize selected EOD(s)')
         ),
         mainPanel(
             p('Saved EODs'),
@@ -31,6 +32,7 @@ savedServer = function(input, output, session, extrainput) {
         
         ret = loadData()
         ret = ret[input$table_rows_selected, ]
+
  
         for(i in 1:nrow(ret)) {
 
@@ -53,6 +55,11 @@ savedServer = function(input, output, session, extrainput) {
                 dat = -dat
             }
             close(myFile)
+
+
+            if(input$normalize) {
+                dat = (dat - min(dat)) / (max(dat)-min(dat))
+            }
             if(i == 1) {
                 plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')       
             } else {
