@@ -7,6 +7,7 @@ savedUI = function(id) {
             p('Select one or multiple EOD selections to plot them on the same axis'),
             sliderInput(ns('windowSize'), label = 'Window size', value = 0.001, min = 0.000001, max = 0.1, step = 0.000001, width='200px'),
             actionButton(ns('deleteButton'), 'Delete selected EOD(s)'),
+            actionButton(ns('deleteAll'), 'Delete all EODs'),
             checkboxInput(ns('normalize'), 'Normalize selected EOD(s)'),
             checkboxInput(ns('baselineSubtract'), 'Baseline subtract selected EOD(s)'),
             checkboxInput(ns('average'), 'Average selected EOD(s)'),
@@ -22,8 +23,11 @@ savedUI = function(id) {
 savedServer = function(input, output, session, extrainput) {
     output$table = DT::renderDataTable({
         input$deleteButton
+        input$deleteAll
         extrainput$saveView
         extrainput$saveInvertedView
+        extrainput$saveAll
+        extrainput$saveInvertedAll
         loadData()
     })
 
@@ -32,6 +36,7 @@ savedServer = function(input, output, session, extrainput) {
             return()
         }
         input$deleteButton
+        input$deleteAll
         extrainput$saveView
         
         ret = loadData()
@@ -51,7 +56,7 @@ savedServer = function(input, output, session, extrainput) {
             s = ret[i, ]$start - input$windowSize / 2
             e = ret[i, ]$start + input$windowSize / 2
 
-            myFilePath = ret[i,]$file
+            myFilePath = ret[i, ]$file
             myFile = file(myFilePath, 'rb')
             if (!file.exists(myFilePath)) {
                 return()
@@ -59,7 +64,7 @@ savedServer = function(input, output, session, extrainput) {
             main = tdmsreader::TdmsFile$new(myFile)
             main$read_data(myFile, s, e)
 
-            r = main$objects[[ret[i,]$object]]
+            r = main$objects[[ret[i, ]$object]]
             t = r$time_track(start = s, end = e)
             t = t - t[1]
             dat = r$data
@@ -70,7 +75,7 @@ savedServer = function(input, output, session, extrainput) {
             }
             
             if(input$normalize) {
-                dat = (dat - min(dat)) / (max(dat)-min(dat))
+                dat = (dat - min(dat)) / (max(dat) - min(dat))
             }
             if(input$baselineSubtract) {
                 dat = dat - mean(dat[1:100])
@@ -79,11 +84,11 @@ savedServer = function(input, output, session, extrainput) {
                 if(is.null(vec)) {
                     vec = dat
                 } else {
-                    vec=vec+dat
+                    vec = vec + dat[1:length(vec)]
                 }
             } else {
                 if(i == 1) {
-                    plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts', ylim=c(-0.2,1))
+                    plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts', ylim = c(-0.2, 1))
                 } else {
                     lines(t, dat, col = i)
                 }
@@ -91,7 +96,7 @@ savedServer = function(input, output, session, extrainput) {
         }
 
         if(input$average) {
-            plot(t, vec[1:length(t)]/nrow(ret), type = 'l', xlab = 'time', ylab = 'volts', ylim=c(-0.2,1))
+            plot(t, vec[1:length(t)] / nrow(ret), type = 'l', xlab = 'time', ylab = 'volts', ylim = c(-0.2, 1))
         }
     })
 
@@ -108,6 +113,15 @@ savedServer = function(input, output, session, extrainput) {
         ret = ret[input$table_rows_selected, ]
         for(i in 1:nrow(ret)) {
             deleteData(ret[i, ]$start, ret[i, ]$file, ret[i, ]$object)
+        }
+    }, priority = 1)
+
+    observeEvent(input$deleteAll, {
+        ret = loadData()
+        ret = ret[input$table_rows_all, ]
+        for(i in 1:nrow(ret)) {
+            r = ret[i, ]
+            deleteData(r$start, r$file, r$object)
         }
     }, priority = 1)
 }
