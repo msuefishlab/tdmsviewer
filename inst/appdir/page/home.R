@@ -207,67 +207,75 @@ homeServer = function(input, output, session, extrainput) {
         plus_peaks = 0
         minus_peaks = 0
         
-        withProgress(message = 'Finding EODs', value = 0, {
-            s = ranges$xmin
-            e = ranges$xmax
-            f = input$tdmsfile
-            if (!file.exists(f)) {
-                return()
+        progress = Progress$new()
+        on.exit(progress$close())
+        progress$set(message = 'Finding EODs', value = 0)
+
+        s = ranges$xmin
+        e = ranges$xmax
+        f = input$tdmsfile
+        if (!file.exists(f)) {
+            return()
+        }
+        m = file(f, 'rb')
+        main = tdmsreader::TdmsFile$new(m)
+        main$read_data(m, s, e)
+
+        r = main$objects[[input$object]]
+        t = r$time_track(start = s, end = e)
+        dat = r$data
+
+        mysd = sd(dat)
+        mymean = mean(dat)
+        progress$inc(0.5)
+
+        curr_time = 0
+        dir = input$threshold_direction
+        type = input$threshold
+        val = input$threshold_value
+        obj = input$object
+        for(i in 1:length(dat)) {
+            ns = i - 1000
+            ne = i + 1000
+            if(i %% 100000 == 0) {
+                progress$inc(i/(2*length(dat))+0.5)
             }
-            m = file(f, 'rb')
-            main = tdmsreader::TdmsFile$new(m)
-            main$read_data(m, s, e)
 
-            r = main$objects[[input$object]]
-            t = r$time_track(start = s, end = e)
-            dat = r$data
 
-            mysd = sd(dat)
-            mymean = mean(dat)
-            setProgress(0.5)
-
-            curr_time = 0
-            for(i in 1:length(dat)) {
-                ns = i - 1000
-                ne = i + 1000
-                if(i %% 100000 == 0) {
-                    setProgress(i/(2*length(dat))+0.5)
-                }
-                if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - curr_time) > 0.001) {
-                    if(input$threshold == 'sigma') {
-                        if(dat[i] > mymean + mysd * input$threshold_value & (input$threshold_direction == 'none' | input$threshold_direction == 'positive')) {
-                            try(saveData(t[ns + which.max(dat[ns:ne])], f, input$object, 0))
-                            curr_time = t[i]
-                            saved_peaks = saved_peaks + 1
-                            plus_peaks = plus_peaks + 1
-                        }
-                        if(dat[i] < mymean - mysd * input$threshold_value & (input$threshold_direction == 'none' | input$threshold_direction == 'negative')) {
-                            try(saveData(t[ns + which.min(dat[ns:ne])], f, input$object, 1))
-                            curr_time = t[i]
-                            saved_peaks = saved_peaks + 1
-                            minus_peaks = minus_peaks + 1
-                        }
+            if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - curr_time) > 0.001) {
+                if(type == 'sigma') {
+                    if(dat[i] > mymean + mysd * val & (dir == 'none' | dir == 'positive')) {
+                        try(saveData(t[ns + which.max(dat[ns:ne])], f, obj, 0))
+                        curr_time = t[i]
+                        saved_peaks = saved_peaks + 1
+                        plus_peaks = plus_peaks + 1
                     }
-                    else if(input$threshold == 'volts') {
-                        if(dat[i] > input$threshold_value & (input$threshold_direction == 'none' | input$threshold_direction == 'positive')) {
-                            try(saveData(t[ns + which.max(dat[ns:ne])], f, input$object, 0))
-                            curr_time = t[i]
-                            saved_peaks = saved_peaks + 1
-                            plus_peaks = plus_peaks + 1
-                        }
-                        if(dat[i] < input$threshold_value & (input$threshold_direction == 'none' | input$threshold_direction == 'negative')) {
-                            try(saveData(t[ns + which.min(dat[ns:ne])], f, input$object, 1))
-                            curr_time = t[i]
-                            saved_peaks = saved_peaks + 1
-                            minus_peaks = minus_peaks + 1
-                        }
+                    if(dat[i] < mymean - mysd * val & (dir == 'none' | dir == 'negative')) {
+                        try(saveData(t[ns + which.min(dat[ns:ne])], f, obj, 1))
+                        curr_time = t[i]
+                        saved_peaks = saved_peaks + 1
+                        minus_peaks = minus_peaks + 1
+                    }
+                } else if(type == 'volts') {
+                    if(dat[i] > val & (dir == 'none' | dir == 'positive')) {
+                        try(saveData(t[ns + which.max(dat[ns:ne])], f, obj, 0))
+                        curr_time = t[i]
+                        saved_peaks = saved_peaks + 1
+                        plus_peaks = plus_peaks + 1
+                    }
+                    if(dat[i] < val & (dir == 'none' | dir == 'negative')) {
+                        try(saveData(t[ns + which.min(dat[ns:ne])], f, obj, 1))
+                        curr_time = t[i]
+                        saved_peaks = saved_peaks + 1
+                        minus_peaks = minus_peaks + 1
                     }
                 }
             }
-            close(m)
-        })
+        }
+        close(m)
         output$txt <- renderText(sprintf("Saved %d peaks (%d+, %d-)", saved_peaks, plus_peaks, minus_peaks))
     })
+
     observe({
         reactiveValuesToList(input)
         session$doBookmark()
