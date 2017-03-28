@@ -227,7 +227,7 @@ homeServer = function(input, output, session, extrainput) {
 
         mysd = sd(dat)
         mymean = mean(dat)
-        progress$inc(0.5)
+        progress$set(0.5)
 
         curr_time = 0
         dir = input$threshold_direction
@@ -238,7 +238,7 @@ homeServer = function(input, output, session, extrainput) {
             ns = i - 1000
             ne = i + 1000
             if(i %% 100000 == 0) {
-                progress$inc(i/(2*length(dat))+0.5)
+                progress$set(i/(2*length(dat))+0.5)
             }
 
 

@@ -1,3 +1,5 @@
+library(ggplot2)
+library(reshape2)
 
 savedUI = function(id) {
     ns = NS(id)
@@ -9,19 +11,16 @@ savedUI = function(id) {
             actionButton(ns('deleteButton'), 'Delete selected EOD(s)'),
             actionButton(ns('deleteAll'), 'Delete all EODs'),
             checkboxInput(ns('normalize'), 'Normalize selected EOD(s)'),
-            checkboxInput(ns('baselineSubtract'), 'Baseline subtract selected EOD(s)'),
+            checkboxInput(ns('preBaselineSubtract'), 'Pre-baseline subtract selected EOD(s)'),
+            checkboxInput(ns('postBaselineSubtract'), 'Post-baseline subtract selected EOD(s)'),
             checkboxInput(ns('average'), 'Average selected EOD(s)'),
             checkboxInput(ns('selectAll'), 'Select all')
         ),
         mainPanel(
-            p('Saved EODs'),
             DT::dataTableOutput(ns('table')),
             plotOutput(ns('plot'),
-                brush = brushOpts(
-                    id = ns('plot_brush'),
-                    resetOnNew = T,
-                    direction = 'x'
-                )
+                click = ns('plot_click'),
+                height = '700px'
             )
         )
     )
@@ -40,7 +39,7 @@ savedServer = function(input, output, session, extrainput) {
         }
         input$deleteButton
         input$deleteAll
-        extrainput$saveView
+        extrainput$saveAll
         
         ret = loadData()
         if(input$selectAll) {
@@ -50,12 +49,10 @@ savedServer = function(input, output, session, extrainput) {
         }
 
         vec = NULL
-#(e-s)/r$properties[['wf_increment']])
         t = numeric(0)
-
+        plotdata = data.frame(col = numeric(0), time = numeric(0), dat = numeric(0))
  
         for(i in 1:nrow(ret)) {
-
             s = ret[i, ]$start - input$windowSize / 2
             e = ret[i, ]$start + input$windowSize / 2
 
@@ -69,37 +66,33 @@ savedServer = function(input, output, session, extrainput) {
 
             r = main$objects[[ret[i, ]$object]]
             t = r$time_track(start = s, end = e)
-            t = t - t[1]
+            t = t - ret[i, ]$start
             dat = r$data
             close(myFile)
 
             if(ret[i, ]$inverted) {
                 dat = -dat
             }
-            
+            if(input$preBaselineSubtract) {
+                dat = dat - mean(dat[1:50])
+            }
             if(input$normalize) {
                 dat = (dat - min(dat)) / (max(dat) - min(dat))
             }
-            if(input$baselineSubtract) {
-                dat = dat - mean(dat[1:100])
+            if(input$postBaselineSubtract) {
+                dat = dat - mean(dat[1:50])
             }
-            if(input$average) {
-                if(is.null(vec)) {
-                    vec = dat
-                } else {
-                    vec = vec + dat[1:length(vec)]
-                }
-            } else {
-                if(i == 1) {
-                    plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
-                } else {
-                    lines(t, dat, col = i)
-                }
-            }
+            # rounding important here to avoid different values being collapsed. significant digits may change on sampling rate of tdms
+            b = data.frame(col = i, time = round(t, digits=5), data = dat)
+            plotdata = rbind(plotdata, b)
         }
 
+        print(head(acast(plotdata, time~col)))
+
         if(input$average) {
-            plot(t, vec[1:length(t)] / nrow(ret), type = 'l', xlab = 'time', ylab = 'volts')
+            ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom="line")
+        } else {
+            ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line()
         }
     })
 
@@ -126,11 +119,21 @@ savedServer = function(input, output, session, extrainput) {
     })
 
 
-    observeEvent(input$plot_brush, {
+    observeEvent(input$plot_click, {
         showModal(modalDialog(
             title = "Landmark editor",
-            sprintf("Add a landmark %f %f", input$plot_brush$xmin, input$plot_brush$xmax)
+            tagList(
+                selectInput(session$ns('landmark'), 'Landmark', c('ZC1','T1','P0','S1','P1','S2','ZC2','P2','T2')),
+                numericInput(session$ns('time_val'), 'Time', value = input$plot_click$x),
+                numericInput(session$ns('volt_val'), 'Volts', value = input$plot_click$y),
+                textInput(session$ns('peak_set'),  'EOD type', value = '<changeme>'),
+                actionButton(session$ns('save_landmark'), 'Save')
+            )
         ))
+    })
+
+    observeEvent(input$save_landmark, {
+         print(sprintf('landmark %s val %f,%f', input$landmark, input$time_val, input$volt_val))
     })
 }
 

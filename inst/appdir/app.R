@@ -45,7 +45,6 @@ server = function(input, output, session) {
         c(
             'saved-table_rows_current',
             'saved-table_cell_clicked',
-            'saved-table_search',
             'saved-table_rows_all',
             'saved-table_state',
             'saved-table_rows_selected',
