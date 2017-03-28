@@ -2,7 +2,7 @@
 
 - Added file selector
 - Added bookmarking ability
-- Added peak finder
+- Added peak finder and user definable cutoff thresholds
 - Added ability to save EOD to SQLite database
 - Added ability to plot saved EODs
 

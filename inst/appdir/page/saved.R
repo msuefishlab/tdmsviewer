@@ -30,10 +30,7 @@ savedServer = function(input, output, session, extrainput) {
     output$table = DT::renderDataTable({
         input$deleteButton
         input$deleteAll
-        extrainput$saveView
-        extrainput$saveInvertedView
         extrainput$saveAll
-        extrainput$saveInvertedAll
         loadData()
     })
 
@@ -106,14 +103,6 @@ savedServer = function(input, output, session, extrainput) {
         }
     })
 
-    observe({
-        input$baselineSubtract
-        input$normalize
-        input$average
-        input$selectAll
-        session$doBookmark()
-    })
-
     observeEvent(input$deleteButton, {
         ret = loadData()
         ret = ret[input$table_rows_selected, ]
@@ -130,5 +119,10 @@ savedServer = function(input, output, session, extrainput) {
             deleteData(r$start, r$file, r$object)
         }
     }, priority = 1)
+
+    observe({
+        reactiveValuesToList(input)
+        session$doBookmark()
+    })
 }
 

@@ -9,7 +9,9 @@ homeSidebarUI = function(id) {
         verbatimTextOutput(ns('distProperties')),
         uiOutput(ns('distChannelLabel')),
         verbatimTextOutput(ns('distChannel')),
-        numericInput(ns('sigma'), label = 'Sigma(σ) threshold for peaks', value = 5)
+        radioButtons(ns('threshold'), 'Threshold type:', c('Sigma' = 'sigma', 'Voltage cutoff' = 'volts')),
+        radioButtons(ns('threshold_direction'), 'Threshold direction:', c('None' = 'none', 'Positive' = 'positive', 'Negative' = 'negative')),
+        numericInput(ns('threshold_value'), label = 'Threshold value', value = 5)
     )
 }
 homeMainUI = function(id) {
@@ -232,23 +234,43 @@ homeServer = function(input, output, session, extrainput) {
                     setProgress(i/(2*length(dat))+0.5)
                 }
                 if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - curr_time) > 0.001) {
-                    if(dat[i] > mymean + mysd * input$sigma) {
-                        try(saveData(t[ns + which.max(dat[ns:ne])], f, input$object, 0))
-                        curr_time = t[i]
-                        saved_peaks = saved_peaks + 1
-                        plus_peaks = plus_peaks + 1
+                    if(input$threshold == 'sigma') {
+                        if(dat[i] > mymean + mysd * input$threshold_value & (input$threshold_direction == 'none' | input$threshold_direction == 'positive')) {
+                            try(saveData(t[ns + which.max(dat[ns:ne])], f, input$object, 0))
+                            curr_time = t[i]
+                            saved_peaks = saved_peaks + 1
+                            plus_peaks = plus_peaks + 1
+                        }
+                        if(dat[i] < mymean - mysd * input$threshold_value & (input$threshold_direction == 'none' | input$threshold_direction == 'negative')) {
+                            try(saveData(t[ns + which.min(dat[ns:ne])], f, input$object, 1))
+                            curr_time = t[i]
+                            saved_peaks = saved_peaks + 1
+                            minus_peaks = minus_peaks + 1
+                        }
                     }
-                    if(dat[i] < mymean - mysd * input$sigma) {
-                        try(saveData(t[ns + which.min(dat[ns:ne])], f, input$object, 1))
-                        curr_time = t[i]
-                        saved_peaks = saved_peaks + 1
-                        minus_peaks = minus_peaks + 1
+                    else if(input$threshold == 'volts') {
+                        if(dat[i] > input$threshold_value & (input$threshold_direction == 'none' | input$threshold_direction == 'positive')) {
+                            try(saveData(t[ns + which.max(dat[ns:ne])], f, input$object, 0))
+                            curr_time = t[i]
+                            saved_peaks = saved_peaks + 1
+                            plus_peaks = plus_peaks + 1
+                        }
+                        if(dat[i] < input$threshold_value & (input$threshold_direction == 'none' | input$threshold_direction == 'negative')) {
+                            try(saveData(t[ns + which.min(dat[ns:ne])], f, input$object, 1))
+                            curr_time = t[i]
+                            saved_peaks = saved_peaks + 1
+                            minus_peaks = minus_peaks + 1
+                        }
                     }
                 }
             }
             close(m)
         })
         output$txt <- renderText(sprintf("Saved %d peaks (%d+, %d-)", saved_peaks, plus_peaks, minus_peaks))
+    })
+    observe({
+        reactiveValuesToList(input)
+        session$doBookmark()
     })
 
 

@@ -34,7 +34,8 @@ server = function(input, output, session) {
     extrainput = callModule(homeServer, 'home', input)
     callModule(savedServer, 'saved', extrainput)
     callModule(helpServer, 'help')
-    observeEvent(input$inTabset, {
+    observe({
+        reactiveValuesToList(input)
         session$doBookmark()
     })
     onBookmarked(function(url) {
