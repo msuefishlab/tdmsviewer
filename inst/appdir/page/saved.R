@@ -124,5 +124,13 @@ savedServer = function(input, output, session, extrainput) {
         reactiveValuesToList(input)
         session$doBookmark()
     })
+
+
+    observeEvent(input$plot_brush, {
+        showModal(modalDialog(
+            title = "Landmark editor",
+            sprintf("Add a landmark %f %f", input$plot_brush$xmin, input$plot_brush$xmax)
+        ))
+    })
 }
 
