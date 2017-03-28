@@ -14,7 +14,9 @@ savedUI = function(id) {
             checkboxInput(ns('preBaselineSubtract'), 'Pre-baseline subtract selected EOD(s)'),
             checkboxInput(ns('postBaselineSubtract'), 'Post-baseline subtract selected EOD(s)'),
             checkboxInput(ns('average'), 'Average selected EOD(s)'),
-            checkboxInput(ns('selectAll'), 'Select all')
+            checkboxInput(ns('selectAll'), 'Select all'),
+            downloadButton(ns('downloadData1'), 'Download waveform matrix'),
+            downloadButton(ns('downloadData2'), 'Download average waveform')
         ),
         mainPanel(
             DT::dataTableOutput(ns('table')),
@@ -26,14 +28,7 @@ savedUI = function(id) {
     )
 }
 savedServer = function(input, output, session, extrainput) {
-    output$table = DT::renderDataTable({
-        input$deleteButton
-        input$deleteAll
-        extrainput$saveAll
-        loadData()
-    })
-
-    output$plot = renderPlot({
+    dataMatrix = reactive({
         if(!input$selectAll && is.null(input$table_rows_selected)) {
             return()
         }
@@ -42,6 +37,7 @@ savedServer = function(input, output, session, extrainput) {
         extrainput$saveAll
         
         ret = loadData()
+
         if(input$selectAll) {
             ret = ret[input$table_rows_all, ]
         } else {
@@ -57,6 +53,9 @@ savedServer = function(input, output, session, extrainput) {
             e = ret[i, ]$start + input$windowSize / 2
 
             myFilePath = ret[i, ]$file
+            if(is.na(myFilePath)) {
+                return()
+            }
             myFile = file(myFilePath, 'rb')
             if (!file.exists(myFilePath)) {
                 return()
@@ -83,17 +82,31 @@ savedServer = function(input, output, session, extrainput) {
                 dat = dat - mean(dat[1:50])
             }
             # rounding important here to avoid different values being collapsed. significant digits may change on sampling rate of tdms
-            b = data.frame(col = i, time = round(t, digits=5), data = dat)
-            plotdata = rbind(plotdata, b)
+            plotdata = rbind(plotdata, data.frame(col = ret[i, ]$start, time = round(t, digits=5), data = dat))
         }
+        plotdata
+    })
 
-        print(head(acast(plotdata, time~col)))
+    output$table = DT::renderDataTable({
+        input$deleteButton
+        input$deleteAll
+        extrainput$saveAll
+        loadData()
+    })
 
-        if(input$average) {
-            ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom="line")
-        } else {
-            ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line()
-        }
+    output$plot = renderPlot({
+        withProgress(message = 'Loading EODs', {
+            plotdata = dataMatrix()
+            if(is.null(plotdata)) {
+                return()
+            }
+
+            if(input$average) {
+                ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom="line")
+            } else {
+                ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line()
+            }
+        })
     })
 
     observeEvent(input$deleteButton, {
@@ -135,5 +148,24 @@ savedServer = function(input, output, session, extrainput) {
     observeEvent(input$save_landmark, {
          print(sprintf('landmark %s val %f,%f', input$landmark, input$time_val, input$volt_val))
     })
+
+
+    output$downloadData1 = downloadHandler(
+        filename = 'matrix.csv',
+        content = function(file) {
+            plotdata = dataMatrix()
+            ret = acast(plotdata, time~col, value.var = 'data')
+            write.csv(ret, file, quote=F, row.names=F)
+        }
+    )
+
+    output$downloadData2 = downloadHandler(
+        filename = 'average.csv',
+        content = function(file) {
+            plotdata = dataMatrix()
+            ret = acast(plotdata, time~col, value.var = 'data')
+            write.csv(apply(ret, 1, mean), file, quote=F, row.names=F)
+        }
+    )
 }
 
