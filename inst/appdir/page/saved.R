@@ -16,7 +16,13 @@ savedUI = function(id) {
         mainPanel(
             p('Saved EODs'),
             DT::dataTableOutput(ns('table')),
-            plotOutput(ns('plot'))
+            plotOutput(ns('plot'),
+                brush = brushOpts(
+                    id = ns('plot_brush'),
+                    resetOnNew = T,
+                    direction = 'x'
+                )
+            )
         )
     )
 }
@@ -88,7 +94,7 @@ savedServer = function(input, output, session, extrainput) {
                 }
             } else {
                 if(i == 1) {
-                    plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts', ylim = c(-0.2, 1))
+                    plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
                 } else {
                     lines(t, dat, col = i)
                 }
@@ -96,7 +102,7 @@ savedServer = function(input, output, session, extrainput) {
         }
 
         if(input$average) {
-            plot(t, vec[1:length(t)] / nrow(ret), type = 'l', xlab = 'time', ylab = 'volts', ylim = c(-0.2, 1))
+            plot(t, vec[1:length(t)] / nrow(ret), type = 'l', xlab = 'time', ylab = 'volts')
         }
     })
 

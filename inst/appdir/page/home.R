@@ -2,7 +2,7 @@
 homeSidebarUI = function(id) {
     ns = NS(id)
     tagList(
-        uiOutput(ns('datasets')),
+        textInput(ns('tdmsfile'), 'TDMS File'),
         uiOutput(ns('objects')),
         uiOutput('TDMS file properties'),
         uiOutput(ns('distPropertiesLabel')),
@@ -35,14 +35,13 @@ homeMainUI = function(id) {
 homeServer = function(input, output, session, extrainput) {
     dataInput = reactive({
         withProgress(message = 'Loading...', value = 0, {
-            myDir = do.call(file.path, c(basedir, extrainput$dir$path))
-            myFilePath = file.path(myDir, input$dataset)
-            if (!file.exists(myFilePath)) {
-                return (NULL)
+            f = input$tdmsfile
+            if(f == '') {
+                return()
             }
-            myFile = file(myFilePath, 'rb')
-            tdmsFile = tdmsreader::TdmsFile$new(myFile)
-            close(myFile)
+            m = file(f, 'rb')
+            tdmsFile = tdmsreader::TdmsFile$new(m)
+            close(m)
             return (tdmsFile)
         })
     })
@@ -62,9 +61,6 @@ homeServer = function(input, output, session, extrainput) {
     })
 
     observeEvent(input$moveRight, {
-        if (is.null(input$dataset)) {
-            return()
-        }
         t1 = ranges$xmax
         t2 = ranges$xmin
         datatable = dataInput()
@@ -75,9 +71,6 @@ homeServer = function(input, output, session, extrainput) {
         updateSliderInput(session, 'sliderRange', value = c(a, b))
     })
     observeEvent(input$moveLeft, {
-        if (is.null(input$dataset)) {
-            return()
-        }
         t1 = ranges$xmax
         t2 = ranges$xmin
         datatable = dataInput()
@@ -88,9 +81,6 @@ homeServer = function(input, output, session, extrainput) {
         updateSliderInput(session, 'sliderRange', value = c(a, b))
     })
     observeEvent(input$zoomIn, {
-        if (is.null(input$dataset)) {
-            return()
-        }
         t1 = ranges$xmax
         t2 = ranges$xmin
         a = t2 + (t1 - t2) / 5
@@ -99,9 +89,6 @@ homeServer = function(input, output, session, extrainput) {
     })
 
     observeEvent(input$zoomOut, {
-        if (is.null(input$dataset)) {
-            return()
-        }
         t1 = ranges$xmax
         t2 = ranges$xmin
         datatable = dataInput()
@@ -112,28 +99,20 @@ homeServer = function(input, output, session, extrainput) {
         updateSliderInput(session, 'sliderRange', value = c(a, b))
     })
 
-    output$datasets = renderUI({
-        if(is.null(extrainput$dir)) {
-            return()
-        }
-        myDir = do.call(file.path, c(basedir, extrainput$dir$path))
-        if (!file.exists(myDir)){
+    observe({
+        d = extrainput$file$files[[1]]
+        if(is.null(d)) {
             return()
         }
 
-        tdmss = list.files(myDir, pattern = '.tdms$')
-        if (length(tdmss) == 0) {
-            showModal(modalDialog('No TDMS files found in folder'))
-            return()
-        }
-        selectInput(session$ns('dataset'), 'TDMS File', tdmss)
+        f = do.call(file.path, c(basedir, d))
+        updateTextInput(session, 'tdmsfile', value = f)
     })
-
     output$objects = renderUI({
-        if (is.null(input$dataset)) {
+        datatable = dataInput()
+        if(is.null(datatable)) {
             return()
         }
-        datatable = dataInput()
         l = list()
         for (elt in ls(datatable$objects)) {
             if (datatable$objects[[elt]]$has_data) {
@@ -163,19 +142,18 @@ homeServer = function(input, output, session, extrainput) {
         s = ranges$xmin
         e = ranges$xmax
 
-        myDir = do.call(file.path, c(basedir, extrainput$dir$path))
-        myFilePath = file.path(myDir, input$dataset)
-        myFile = file(myFilePath, 'rb')
-        if (!file.exists(myFilePath)) {
+        f = input$tdmsfile
+        if (!file.exists(f)) {
             return()
         }
-        main = tdmsreader::TdmsFile$new(myFile)
-        main$read_data(myFile, s, e)
+        m = file(f, 'rb')
+        main = tdmsreader::TdmsFile$new(m)
+        main$read_data(m, s, e)
 
         r = main$objects[[input$object]]
         t = r$time_track(start = s, end = e)
         dat = r$data
-        close(myFile)
+        close(m)
 
         plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
     })
@@ -222,49 +200,55 @@ homeServer = function(input, output, session, extrainput) {
     })
 
     observeEvent(input$saveAll, {
-        s = ranges$xmin
-        e = ranges$xmax
 
-        myDir = do.call(file.path, c(basedir, extrainput$dir$path))
-        myFilePath = file.path(myDir, input$dataset)
-        myFile = file(myFilePath, 'rb')
-        if (!file.exists(myFilePath)) {
-            return()
-        }
-        main = tdmsreader::TdmsFile$new(myFile)
-        main$read_data(myFile, s, e)
-
-        r = main$objects[[input$object]]
-        t = r$time_track(start = s, end = e)
-        dat = r$data
-
-        mysd = sd(dat)
-        mymean = mean(dat)
-        curr_time = 0
         saved_peaks = 0
         plus_peaks = 0
         minus_peaks = 0
-        for(i in 1:length(dat)) {
-            ns = i - 1000
-            ne = i + 1000
-            if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - curr_time) > 0.001) {
-                if(dat[i] > mymean + mysd * input$sigma) {
-                    try(saveData(t[ns + which.max(dat[ns:ne])], file.path(myDir, input$dataset), input$object, 0))
-                    curr_time = t[i]
-                    saved_peaks = saved_peaks + 1
-                    plus_peaks = plus_peaks + 1
+        
+        withProgress(message = 'Finding EODs', value = 0, {
+            s = ranges$xmin
+            e = ranges$xmax
+            f = input$tdmsfile
+            if (!file.exists(f)) {
+                return()
+            }
+            m = file(f, 'rb')
+            main = tdmsreader::TdmsFile$new(m)
+            main$read_data(m, s, e)
+
+            r = main$objects[[input$object]]
+            t = r$time_track(start = s, end = e)
+            dat = r$data
+
+            mysd = sd(dat)
+            mymean = mean(dat)
+            setProgress(0.5)
+
+            curr_time = 0
+            for(i in 1:length(dat)) {
+                ns = i - 1000
+                ne = i + 1000
+                if(i %% 100000 == 0) {
+                    setProgress(i/(2*length(dat))+0.5)
                 }
-                if(dat[i] < mymean - mysd * input$sigma) {
-                    try(saveData(t[ns + which.min(dat[ns:ne])], file.path(myDir, input$dataset), input$object, 1))
-                    curr_time = t[i]
-                    saved_peaks = saved_peaks + 1
-                    minus_peaks = minus_peaks + 1
+                if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - curr_time) > 0.001) {
+                    if(dat[i] > mymean + mysd * input$sigma) {
+                        try(saveData(t[ns + which.max(dat[ns:ne])], f, input$object, 0))
+                        curr_time = t[i]
+                        saved_peaks = saved_peaks + 1
+                        plus_peaks = plus_peaks + 1
+                    }
+                    if(dat[i] < mymean - mysd * input$sigma) {
+                        try(saveData(t[ns + which.min(dat[ns:ne])], f, input$object, 1))
+                        curr_time = t[i]
+                        saved_peaks = saved_peaks + 1
+                        minus_peaks = minus_peaks + 1
+                    }
                 }
             }
-        }
+            close(m)
+        })
         output$txt <- renderText(sprintf("Saved %d peaks (%d+, %d-)", saved_peaks, plus_peaks, minus_peaks))
-        
-        close(myFile)
     })
 
 

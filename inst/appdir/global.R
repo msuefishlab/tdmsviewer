@@ -1,6 +1,7 @@
 library(RSQLite)
 sqlitePath = '~/sql.db'
 table = 'responses'
+table2 = 'landmarks'
 
 
 

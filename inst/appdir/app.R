@@ -12,7 +12,7 @@ ui = function() {
                 tabPanel(style = 'margin: 20px;', id = 'home', 'Home',
                     sidebarLayout(
                         sidebarPanel(
-                            shinyFiles::shinyDirButton('dir', label = 'Directory select', title = 'Please select a directory'),
+                            shinyFiles::shinyFilesButton('file', label = 'Choose TDMS file', title = 'Please select a TDMS file', multiple = F),
                             homeSidebarUI('home')
                         ),
                         mainPanel(
@@ -27,7 +27,7 @@ ui = function() {
     )
 }
 server = function(input, output, session) {
-    shinyFiles::shinyDirChoose(input, 'dir', session = session, roots = c(home = basedir))
+    shinyFiles::shinyFileChoose(input, 'file', session = session, roots = c(home = basedir))
     source('page/home.R', local = T)
     source('page/saved.R', local = T)
     source('page/help.R', local = T)
@@ -48,18 +48,12 @@ server = function(input, output, session) {
             'saved-table_rows_all',
             'saved-table_state',
             'saved-table_rows_selected',
-            'home-saveView',
-            'dir-modal',
-            'dir',
-            'home-saveInvertedView',
-            'home-saveView',
+            'saved-deleteButton',
             'home-moveRight',
             'home-moveLeft',
             'home-zoomOut',
             'home-zoomIn',
-            'home-dataset',
-            'home-object',
-            'saved-deleteButton',
+            'home-saveAll',
             'home-plot_brush'
         )
     )
