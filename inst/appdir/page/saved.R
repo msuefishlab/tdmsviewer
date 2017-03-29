@@ -2,6 +2,7 @@ library(ggplot2)
 library(reshape2)
 
 savedUI = function(id) {
+
     ns = NS(id)
     sidebarLayout(
         sidebarPanel(
@@ -28,6 +29,8 @@ savedUI = function(id) {
     )
 }
 savedServer = function(input, output, session, extrainput) {
+    source('page/landmark.R', local = T)
+
     dataMatrix = reactive({
         if(!input$selectAll && is.null(input$table_rows_selected)) {
             return()
@@ -102,7 +105,7 @@ savedServer = function(input, output, session, extrainput) {
             }
 
             if(input$average) {
-                ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom="line")
+                ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line')
             } else {
                 ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line()
             }
@@ -132,24 +135,6 @@ savedServer = function(input, output, session, extrainput) {
     })
 
 
-    observeEvent(input$plot_click, {
-        showModal(modalDialog(
-            title = "Landmark editor",
-            tagList(
-                selectInput(session$ns('landmark'), 'Landmark', c('ZC1','T1','P0','S1','P1','S2','ZC2','P2','T2')),
-                numericInput(session$ns('time_val'), 'Time', value = input$plot_click$x),
-                numericInput(session$ns('volt_val'), 'Volts', value = input$plot_click$y),
-                textInput(session$ns('peak_set'),  'EOD type', value = '<changeme>'),
-                actionButton(session$ns('save_landmark'), 'Save')
-            )
-        ))
-    })
-
-    observeEvent(input$save_landmark, {
-         print(sprintf('landmark %s val %f,%f', input$landmark, input$time_val, input$volt_val))
-    })
-
-
     output$downloadData1 = downloadHandler(
         filename = 'matrix.csv',
         content = function(file) {
@@ -167,5 +152,13 @@ savedServer = function(input, output, session, extrainput) {
             write.csv(apply(ret, 1, mean), file, quote=F, row.names=F)
         }
     )
+
+    observeEvent(input$plot_click, {
+        showModal(modalDialog(
+            title = 'Landmark editor',
+            landmarkUI('landmark')
+        ))
+    })
+    callModule(landmarkServer, 'landmark')
 }
 
