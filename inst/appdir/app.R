@@ -4,6 +4,7 @@ ui = function() {
     source('page/home.R', local = T)
     source('page/saved.R', local = T)
     source('page/help.R', local = T)
+    source('page/landmarkpage.R', local = T)
     fluidPage(
         includeCSS('styles.css'),
         headerPanel('tdmsviewer'),
@@ -21,7 +22,8 @@ ui = function() {
                     )
                 ),
                 tabPanel(style = 'margin: 20px;', id = 'saved', 'Saved EODs', savedUI('saved')),
-                tabPanel(style = 'margin: 20px;', id = 'help', 'Help', helpUI('help'))
+                tabPanel(style = 'margin: 20px;', id = 'help', 'Help', helpUI('help')),
+                tabPanel(style = 'margin: 20px;', id = 'landmarkpage', 'Landmarks', landmarkpageUI('landmarkpage'))
             )
         )
     )
@@ -31,9 +33,11 @@ server = function(input, output, session) {
     source('page/home.R', local = T)
     source('page/saved.R', local = T)
     source('page/help.R', local = T)
+    source('page/landmarkpage.R', local = T)
     extrainput = callModule(homeServer, 'home', input)
     callModule(savedServer, 'saved', extrainput)
     callModule(helpServer, 'help')
+    callModule(landmarkpageServer, 'landmarkpage')
     observe({
         reactiveValuesToList(input)
         session$doBookmark()
