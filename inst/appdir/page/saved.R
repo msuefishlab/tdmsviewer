@@ -138,8 +138,8 @@ savedServer = function(input, output, session, extrainput) {
         filename = 'matrix.csv',
         content = function(file) {
             plotdata = dataMatrix()
-            ret = acast(plotdata, time~col, value.var = 'data')
-            write.csv(ret, file, quote=F, row.names=F)
+            ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate=mean)
+            write.csv(ret, file, quote = F)
         }
     )
 
@@ -147,8 +147,8 @@ savedServer = function(input, output, session, extrainput) {
         filename = 'average.csv',
         content = function(file) {
             plotdata = dataMatrix()
-            ret = acast(plotdata, time~col, value.var = 'data')
-            write.csv(apply(ret, 1, mean), file, quote=F, row.names=F)
+            ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate=mean)
+            write.csv(apply(ret, 1, mean), file, quote = F)
         }
     )
 

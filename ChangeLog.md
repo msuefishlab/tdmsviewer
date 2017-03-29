@@ -1,10 +1,14 @@
+## Version 0.4.0 - March 29th, 2017
+
+- Added interactive landmark editing functions for EOD
+
 ## Version 0.3.0 - March 28th, 2017
 
 - Changed directory selector to file selector
 - Enhanced bookmarking ability so page refreshes loads same file
 - Added peak finder and user definable cutoff thresholds for sigma or voltage
 - Added ggplot2 for average EOD values
-- Added download buttons for EOD values
+- Added download buttons for EOD waveforms as CSV
 
 ## Version 0.2.0 - March 24th, 2017
 
