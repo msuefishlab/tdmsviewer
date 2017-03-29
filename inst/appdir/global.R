@@ -10,6 +10,8 @@ if(!file.exists(sqlitePath)) {
     db = dbConnect(SQLite(), sqlitePath)
     query = sprintf("CREATE TABLE %s(start REAL, file TEXT, object TEXT, inverted INTEGER, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, unique (start, file, object))", table)
     dbGetQuery(db, query)
+    query2 = sprintf("CREATE TABLE %s(P0 REAL, P1 REAL, P2 REAL, S1 REAL, S2 REAL, T1 REAL, T2 REAL, ZC1 REAL, ZC2 REAL, name TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)", table2)
+    dbGetQuery(db, query2)
     dbDisconnect(db)
 }
 
