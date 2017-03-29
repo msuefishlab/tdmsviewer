@@ -2,7 +2,6 @@ library(ggplot2)
 library(reshape2)
 
 savedUI = function(id) {
-
     ns = NS(id)
     sidebarLayout(
         sidebarPanel(
@@ -156,7 +155,8 @@ savedServer = function(input, output, session, extrainput) {
     observeEvent(input$plot_click, {
         showModal(modalDialog(
             title = 'Landmark editor',
-            landmarkUI('landmark')
+            easyClose = T,
+            landmarkUI(session$ns('landmark'))
         ))
     })
     callModule(landmarkServer, 'landmark')

@@ -22,8 +22,8 @@ ui = function() {
                     )
                 ),
                 tabPanel(style = 'margin: 20px;', id = 'saved', 'Saved EODs', savedUI('saved')),
-                tabPanel(style = 'margin: 20px;', id = 'help', 'Help', helpUI('help')),
-                tabPanel(style = 'margin: 20px;', id = 'landmarkpage', 'Landmarks', landmarkpageUI('landmarkpage'))
+                tabPanel(style = 'margin: 20px;', id = 'landmarkpage', 'Landmarks', landmarkpageUI('landmarkpage')),
+                tabPanel(style = 'margin: 20px;', id = 'help', 'Help', helpUI('help'))
             )
         )
     )
@@ -53,6 +53,9 @@ server = function(input, output, session) {
             'saved-table_state',
             'saved-table_rows_selected',
             'saved-deleteButton',
+            'saved-landmark-save_landmark',
+            'saved-landmark-time_value',
+            'saved-landmark-landmark',
             'home-moveRight',
             'home-moveLeft',
             'home-zoomOut',
