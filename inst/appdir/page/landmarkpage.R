@@ -7,7 +7,8 @@ landmarkpageUI = function(id) {
             p('View landmark data'),
             fileInput(ns('file'), 'Upload EOD data', multiple = FALSE),
             actionButton(ns('refresh'), 'Refresh'),
-            actionButton(ns('deleteAll'), 'Delete landmark(s)')
+            actionButton(ns('deleteAll'), 'Delete landmark(s)'),
+            selectInput(ns('eod_description'), 'EOD description', unique(loadLandmarks()$description))
         ),
         mainPanel(
             DT::dataTableOutput(ns('table')),
@@ -19,7 +20,8 @@ landmarkpageUI = function(id) {
 landmarkpageServer = function(input, output, session, extrainput) {
     observeEvent(input$deleteAll, {
         ret = loadLandmarks()
-        ret = ret[input$table_rows_all, ]
+        ret = ret[ret$description == input$eod_description, ]
+
         for(i in 1:nrow(ret)) {
             r = ret[i, ]
             deleteLandmark(r$landmark, r$description)
@@ -28,7 +30,7 @@ landmarkpageServer = function(input, output, session, extrainput) {
 
     output$textvals = renderText({
         ret = loadLandmarks()
-        ret = ret[input$table_rows_all, ]
+        ret = ret[ret$description == input$eod_description, ]
 
         inFile <- input$file
         if(is.null(inFile)) {
@@ -52,7 +54,7 @@ landmarkpageServer = function(input, output, session, extrainput) {
     })
     output$plotvals = renderPlot({
         ret = loadLandmarks()
-        ret = ret[input$table_rows_all, ]
+        ret = ret[ret$description == input$eod_description, ]
 
         inFile <- input$file
         if(is.null(inFile)) {
@@ -77,7 +79,9 @@ landmarkpageServer = function(input, output, session, extrainput) {
         input$deleteAll
         input$refresh
         
-        loadLandmarks()
+        ret = loadLandmarks()
+        ret = ret[ret$description == input$eod_description, ]
+        ret
     })
 
 }
