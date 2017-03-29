@@ -4,7 +4,7 @@ ui = function() {
     source('page/home.R', local = T)
     source('page/saved.R', local = T)
     source('page/help.R', local = T)
-    source('page/landmarkpage.R', local = T)
+    source('page/landmark_page.R', local = T)
     fluidPage(
         includeCSS('styles.css'),
         headerPanel('tdmsviewer'),
@@ -33,7 +33,7 @@ server = function(input, output, session) {
     source('page/home.R', local = T)
     source('page/saved.R', local = T)
     source('page/help.R', local = T)
-    source('page/landmarkpage.R', local = T)
+    source('page/landmark_page.R', local = T)
     extrainput = callModule(homeServer, 'home', input)
     callModule(savedServer, 'saved', extrainput)
     callModule(helpServer, 'help')

@@ -28,7 +28,7 @@ savedUI = function(id) {
     )
 }
 savedServer = function(input, output, session, extrainput) {
-    source('page/landmark.R', local = T)
+    source('page/landmark_dialog.R', local = T)
 
     dataMatrix = reactive({
         if(!input$selectAll && is.null(input$table_rows_selected)) {

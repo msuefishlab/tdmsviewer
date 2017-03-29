@@ -46,8 +46,6 @@ landmarkpageServer = function(input, output, session, extrainput) {
         })
         newdf = do.call(rbind, newdf)
         ret = lapply(1:nrow(newdf), function(i) {
-            print(newdf[i,])
-            print(mean(as.numeric(newdf[i,])))
             sprintf('Output %s: val %f (sd %f)', ret[i, ]$landmark, mean(as.numeric(newdf[i, ])), sd(newdf[i, ]))
         })
         paste0(ret, collapse = '\n')
