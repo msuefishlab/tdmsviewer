@@ -1,8 +1,10 @@
 ## Version 0.4.1 - March 30th, 2017
 
-- Fix DESCRIPTION
-- Add user guide vignette
-- Added "Too much data" warning
+- Updated DESCRIPTION
+- Added user guide vignette
+- Added "Too much data" warning when large amount of TDMS viewed
+- Added option for configuring sqlite DB path
+- Added workaround to launch internet browser instead of RStudio built-in browser
 
 ## Version 0.4.0 - March 29th, 2017
 

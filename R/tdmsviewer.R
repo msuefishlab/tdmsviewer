@@ -8,10 +8,15 @@
 #' }
 #' @export
 #' @param basedir Root directory for TDMS files. Default '~'
+#' @param sqlitePath Path to sqlite DB. Default '~/sql.db'
 #' @param dev Boolean if using dev environment, loads from local directories
-tdmsviewer = function(basedir = '~', dev = F) {
+tdmsviewer = function(basedir = '~', sqlitePath = '~/sql.db', dev = F) {
     .GlobalEnv$basedir <- basedir
-    on.exit(rm(basedir, envir = .GlobalEnv))
+    .GlobalEnv$sqlitePath <- sqlitePath
+    on.exit({
+        rm(basedir, envir = .GlobalEnv)
+        rm(sqlitePath, envir = .GlobalEnv)
+    })
     if (!dev) {
         shiny::runApp(base::system.file("appdir", package = "tdmsviewer"), launch.browser = T)
     } else {

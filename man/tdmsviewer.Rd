@@ -4,10 +4,12 @@
 \alias{tdmsviewer}
 \title{Launch the tdmsviewer app}
 \usage{
-tdmsviewer(basedir = "~", dev = F)
+tdmsviewer(basedir = "~", sqlitePath = "~/sql.db", dev = F)
 }
 \arguments{
 \item{basedir}{Root directory for TDMS files. Default '~'}
+
+\item{sqlitePath}{Path to sqlite DB. Default '~/sql.db'}
 
 \item{dev}{Boolean if using dev environment, loads from local directories}
 }
