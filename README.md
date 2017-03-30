@@ -33,8 +33,11 @@ To interact with the TDMS data, you can use the following tools
 ![](img/1.png)
 
 
+## Documentation
+
+The markdown vignette which includes installation instructions and user manual is available at <https://msuefishlab.github.io/tdmsviewer/>
+
+
 ## Notes
 
-When installing on Windows, manually install shiny/RJSONIO first with `install.packages(c('shiny','RJSONIO'))`
-
-By default, the basedir is the home directory '~' but you can adjust that with arguments to tdmsviewer(). On Windows, that you can run `tdmsviewer(basedir = '~/..')` This gives access to Downloads folder, Desktop, etc.
+Based on the [tdmsreader](https://github.com/msuefishlab/tdmsreader) package

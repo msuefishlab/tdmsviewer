@@ -9,9 +9,9 @@ homeSidebarUI = function(id) {
         verbatimTextOutput(ns('distProperties')),
         uiOutput(ns('distChannelLabel')),
         verbatimTextOutput(ns('distChannel')),
-        radioButtons(ns('threshold'), 'Threshold type:', c('Sigma' = 'sigma', 'Voltage cutoff' = 'volts')),
-        radioButtons(ns('threshold_direction'), 'Threshold direction:', c('None' = 'none', 'Positive' = 'positive', 'Negative' = 'negative')),
-        numericInput(ns('threshold_value'), label = 'Threshold value', value = 5)
+        radioButtons(ns('thresholdType'), 'Threshold type:', c('Sigma' = 'sigma', 'Voltage cutoff' = 'volts')),
+        radioButtons(ns('thresholdDirection'), 'Threshold direction:', c('None' = 'none', 'Positive' = 'positive', 'Negative' = 'negative')),
+        numericInput(ns('thresholdValue'), label = 'Threshold value', value = 5)
     )
 }
 homeMainUI = function(id) {
@@ -26,7 +26,7 @@ homeMainUI = function(id) {
         uiOutput(ns('sliderOutput')),
         plotOutput(ns('distPlot'),
             brush = brushOpts(
-                id = ns('plot_brush'),
+                id = ns('plotBrush'),
                 resetOnNew = T,
                 direction = 'x'
             )
@@ -50,8 +50,8 @@ homeServer = function(input, output, session, extrainput) {
 
     ranges = reactiveValues(xmin = 0, xmax = 1)
 
-    observeEvent(input$plot_brush, {
-        brush = input$plot_brush
+    observeEvent(input$plotBrush, {
+        brush = input$plotBrush
         if (!is.null(brush)) {
             updateSliderInput(session, 'sliderRange', value = c(brush$xmin, brush$xmax))
         }
@@ -144,6 +144,12 @@ homeServer = function(input, output, session, extrainput) {
         s = ranges$xmin
         e = ranges$xmax
 
+        if(e - s > 20) {
+            plot(1, type="n", xlab="", ylab="", xlim=c(0, 10), ylim=c(0, 10))
+            text(1, 9, "Too much data plotted")
+            return()
+        }
+
         f = input$tdmsfile
         if (!file.exists(f)) {
             return()
@@ -203,9 +209,9 @@ homeServer = function(input, output, session, extrainput) {
 
     observeEvent(input$saveAll, {
 
-        saved_peaks = 0
-        plus_peaks = 0
-        minus_peaks = 0
+        savedPeaks = 0
+        plusPeaks = 0
+        minusPeaks = 0
         
         progress = Progress$new()
         on.exit(progress$close())
@@ -229,10 +235,10 @@ homeServer = function(input, output, session, extrainput) {
         mymean = mean(dat)
         progress$set(0.5)
 
-        curr_time = 0
-        dir = input$threshold_direction
-        type = input$threshold
-        val = input$threshold_value
+        currTime = 0
+        dir = input$thresholdDirection
+        type = input$thresholdType
+        val = input$thresholdValue
         obj = input$object
         for(i in 1:length(dat)) {
             ns = i - 1000
@@ -242,38 +248,38 @@ homeServer = function(input, output, session, extrainput) {
             }
 
 
-            if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - curr_time) > 0.001) {
+            if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - currTime) > 0.001) {
                 if(type == 'sigma') {
                     if(dat[i] > mymean + mysd * val & (dir == 'none' | dir == 'positive')) {
                         try(saveData(t[ns + which.max(dat[ns:ne])], f, obj, 0))
-                        curr_time = t[i]
-                        saved_peaks = saved_peaks + 1
-                        plus_peaks = plus_peaks + 1
+                        currTime = t[i]
+                        savedPeaks = savedPeaks + 1
+                        plusPeaks = plusPeaks + 1
                     }
                     if(dat[i] < mymean - mysd * val & (dir == 'none' | dir == 'negative')) {
                         try(saveData(t[ns + which.min(dat[ns:ne])], f, obj, 1))
-                        curr_time = t[i]
-                        saved_peaks = saved_peaks + 1
-                        minus_peaks = minus_peaks + 1
+                        currTime = t[i]
+                        savedPeaks = savedPeaks + 1
+                        minusPeaks = minusPeaks + 1
                     }
                 } else if(type == 'volts') {
                     if(dat[i] > val & (dir == 'none' | dir == 'positive')) {
                         try(saveData(t[ns + which.max(dat[ns:ne])], f, obj, 0))
-                        curr_time = t[i]
-                        saved_peaks = saved_peaks + 1
-                        plus_peaks = plus_peaks + 1
+                        currTime = t[i]
+                        savedPeaks = savedPeaks + 1
+                        plusPeaks = plusPeaks + 1
                     }
                     if(dat[i] < val & (dir == 'none' | dir == 'negative')) {
                         try(saveData(t[ns + which.min(dat[ns:ne])], f, obj, 1))
-                        curr_time = t[i]
-                        saved_peaks = saved_peaks + 1
-                        minus_peaks = minus_peaks + 1
+                        currTime = t[i]
+                        savedPeaks = savedPeaks + 1
+                        minusPeaks = minusPeaks + 1
                     }
                 }
             }
         }
         close(m)
-        output$txt <- renderText(sprintf("Saved %d peaks (%d+, %d-)", saved_peaks, plus_peaks, minus_peaks))
+        output$txt <- renderText(sprintf("Saved %d peaks (%d+, %d-)", savedPeaks, plusPeaks, minusPeaks))
     })
 
     observe({

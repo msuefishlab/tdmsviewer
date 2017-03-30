@@ -11,8 +11,8 @@ savedUI = function(id) {
             actionButton(ns('deleteButton'), 'Delete selected EOD(s)'),
             actionButton(ns('deleteAll'), 'Delete all EODs'),
             checkboxInput(ns('normalize'), 'Normalize selected EOD(s)'),
-            checkboxInput(ns('preBaselineSubtract'), 'Pre-baseline subtract selected EOD(s)'),
-            checkboxInput(ns('postBaselineSubtract'), 'Post-baseline subtract selected EOD(s)'),
+            checkboxInput(ns('preBaselineSubtract'), 'Pre-normalization baseline subtract'),
+            checkboxInput(ns('postBaselineSubtract'), 'Post-normalization baseline subtract'),
             checkboxInput(ns('average'), 'Average selected EOD(s)'),
             checkboxInput(ns('selectAll'), 'Select all'),
             downloadButton(ns('downloadData1'), 'Download waveform matrix'),
@@ -21,7 +21,7 @@ savedUI = function(id) {
         mainPanel(
             DT::dataTableOutput(ns('table')),
             plotOutput(ns('plot'),
-                click = ns('plot_click'),
+                click = ns('plotClick'),
                 height = '700px'
             )
         )
@@ -75,13 +75,13 @@ savedServer = function(input, output, session, extrainput) {
                 dat = -dat
             }
             if(input$preBaselineSubtract) {
-                dat = dat - mean(dat[1:50])
+                dat = dat - mean(dat[1:25])
             }
             if(input$normalize) {
                 dat = (dat - min(dat)) / (max(dat) - min(dat))
             }
             if(input$postBaselineSubtract) {
-                dat = dat - mean(dat[1:50])
+                dat = dat - mean(dat[1:25])
             }
             # rounding important here to avoid different values being collapsed. significant digits may change on sampling rate of tdms
             plotdata = rbind(plotdata, data.frame(col = ret[i, ]$start, time = round(t, digits=5), data = dat))
@@ -152,7 +152,7 @@ savedServer = function(input, output, session, extrainput) {
         }
     )
 
-    observeEvent(input$plot_click, {
+    observeEvent(input$plotClick, {
         showModal(modalDialog(
             title = 'Landmark editor',
             easyClose = T,

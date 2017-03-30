@@ -13,8 +13,8 @@ tdmsviewer = function(basedir = '~', dev = F) {
     .GlobalEnv$basedir <- basedir
     on.exit(rm(basedir, envir = .GlobalEnv))
     if (!dev) {
-        shiny::runApp(base::system.file("appdir", package = "tdmsviewer"))
+        shiny::runApp(base::system.file("appdir", package = "tdmsviewer"), launch.browser = T)
     } else {
-        shiny::runApp('inst/appdir')
+        shiny::runApp('inst/appdir', launch.browser = T)
     }
 }

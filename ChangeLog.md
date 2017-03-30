@@ -2,6 +2,7 @@
 
 - Fix DESCRIPTION
 - Add user guide vignette
+- Added "Too much data" warning
 
 ## Version 0.4.0 - March 29th, 2017
 
