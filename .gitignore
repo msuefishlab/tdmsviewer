@@ -1,6 +1,0 @@
-.DS_Store
-.Rhistory
-data/*
-.RData
-inst/doc
-vignettes/.build.timestamp
