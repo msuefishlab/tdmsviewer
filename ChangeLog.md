@@ -1,3 +1,8 @@
+## Version 0.4.1 - March 30th, 2017
+
+- Fix DESCRIPTION
+- Add user guide vignette
+
 ## Version 0.4.0 - March 29th, 2017
 
 - Added interactive landmark editing functions for EOD
