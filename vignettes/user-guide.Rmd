@@ -21,7 +21,7 @@ https://github.com/msuefishlab/tdmsviewer
 TDMS Viewer is designed as an R package, to be installed using a package
 manager. In our case, we install it from github. Open RStudio and run
 
-```{r}
+```{r,eval = FALSE}
 install.packages('devtools')
 library(devtools)
 install_github('msuefishlab/tdmsviewer')
@@ -34,7 +34,7 @@ additional dependencies need to be installed manually.
 To make sure you are installing the version mentioned in this guide, you
 can also run
 
-```{r}
+```{r,eval = FALSE}
 install_github('msuefishlab/tdmsviewer@0.4.0')
 ```
 
@@ -54,13 +54,13 @@ install.packages(c('htmlwidgets','DT','RSQLite','Rcpp'))
 
 Note that this is only a problem on windows, other platforms will
 install all dependencies automatically when you use
-install\_github('msuefishlab/tdmsviewer')
+`install_github('msuefishlab/tdmsviewer')`
 
 ## Using TDMSViewer
 
 Once the library is installed, you can then use it by running
 
-```{r}
+```{r,eval=FALSE}
 library(tdmsviewer)
 tdmsviewer()
 ```
@@ -72,14 +72,14 @@ Note that you may also want to set the "base directory" of the app to
 either broaden or limit the subfolders that the webapp can access.
 Simply run instead
 
-```{r}
+```{r,eval=FALSE}
 library(tdmsviewer)
 tdmsviewer(basedir="C:\\")
 ```
 
 To run from root C: drive on windows. Or
 
-```{r}
+```{r,eval=FALSE}
 library(tdmsviewer)
 tdmsviewer(basedir="C:\\Users\\YourName\\Desktop\\FolderWithTDMS")
 ```
