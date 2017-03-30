@@ -16,8 +16,11 @@ Imports:
     tdmsreader (>= 0.1.0),
     RSQLite (>= 1.1)
 Suggests:
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 Remotes: msuefishlab/tdmsreader
 License: MIT
 Encoding: UTF-8
 RoxygenNote: 6.0.1.9000
+VignetteBuilder: knitr
