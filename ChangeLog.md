@@ -2,7 +2,7 @@
 
 - Updated DESCRIPTION
 - Added user guide vignette
-- Added "Too much data" warning when large amount of TDMS viewed
+- Added downsampling when large TDMS area viewed
 - Added option for configuring sqlite DB path
 - Added workaround to launch internet browser instead of RStudio built-in browser
 

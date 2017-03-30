@@ -1,4 +1,9 @@
 
+sl <- function(x, z) {
+    (c(0, cumsum(diff(x)[1:(length(x)-z-1)])) + rep(sum(x[1:z]),length(x)-z))
+}
+
+
 homeSidebarUI = function(id) {
     ns = NS(id)
     tagList(
@@ -144,11 +149,6 @@ homeServer = function(input, output, session, extrainput) {
         s = ranges$xmin
         e = ranges$xmax
 
-        if(e - s > 20) {
-            plot(1, type="n", xlab="", ylab="", xlim=c(0, 10), ylim=c(0, 10))
-            text(1, 9, "Too much data plotted")
-            return()
-        }
 
         f = input$tdmsfile
         if (!file.exists(f)) {
@@ -163,7 +163,21 @@ homeServer = function(input, output, session, extrainput) {
         dat = r$data
         close(m)
 
-        plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
+        if(e - s > 20) {
+            dat = sl(dat, 10)
+            dat = dat[seq(1, length(dat), by = 10)]
+            t = t[seq(1, length(t), by = 10)]
+            dat = dat[1:length(t)]
+            plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
+        } else if(e - s > 10) {
+            dat = sl(dat, 5)
+            dat = dat[seq(1, length(dat), by=5)]
+            t = t[seq(1, length(t), by=5)]
+            dat = dat[1:length(t)]
+            plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
+        } else {
+            plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
+        }
     })
 
     output$distPropertiesLabel = renderUI({
