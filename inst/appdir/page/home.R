@@ -1,9 +1,4 @@
 
-sl <- function(x, z) {
-    (c(0, cumsum(diff(x)[1:(length(x)-z-1)])) + rep(sum(x[1:z]),length(x)-z))
-}
-
-
 homeSidebarUI = function(id) {
     ns = NS(id)
     tagList(
@@ -36,7 +31,8 @@ homeMainUI = function(id) {
                 direction = 'x'
             )
         ),
-        verbatimTextOutput(ns('txt'))
+        verbatimTextOutput(ns('txt')),
+        verbatimTextOutput(ns('txt2'))
     )
 }
 homeServer = function(input, output, session, extrainput) {
@@ -164,18 +160,19 @@ homeServer = function(input, output, session, extrainput) {
         close(m)
 
         if(e - s > 20) {
-            dat = sl(dat, 10)
             dat = dat[seq(1, length(dat), by = 10)]
             t = t[seq(1, length(t), by = 10)]
             dat = dat[1:length(t)]
             plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
+            output$txt2 <- renderText('Note: displayed data is downsampled to improve speed')
         } else if(e - s > 10) {
-            dat = sl(dat, 5)
-            dat = dat[seq(1, length(dat), by=5)]
-            t = t[seq(1, length(t), by=5)]
+            dat = dat[seq(1, length(dat), by = 5)]
+            t = t[seq(1, length(t), by = 5)]
             dat = dat[1:length(t)]
             plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
+            output$txt2 <- renderText('Note: displayed data is downsampled to improve speed')
         } else {
+            output$txt2 <- renderText('')
             plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
         }
     })
