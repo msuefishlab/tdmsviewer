@@ -122,7 +122,17 @@ savedServer = function(input, output, session, extrainput) {
 
                 output$landmarks = DT::renderDataTable(as.data.frame(r))
                 output$stats = renderText(sprintf('P1-P2: %f\nT2-T1: %f', r['p1',]$val-r['p2',]$val, r['t2',]$time-r['t1',]$time))
+
+                ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate=mean)
+                avg = apply(ret, 1, mean)
+                data = data.frame(time=as.numeric(names(avg)), val=as.numeric(avg))
+
+                baseline = mean(data$val[1:50])
+                myplot = myplot + geom_hline(yintercept = baseline, color='red')
+                myplot = myplot + geom_hline(yintercept = baseline+0.02*(r['p1',]$val-r['p2',]$val), color='yellow')
+                myplot = myplot + geom_hline(yintercept = baseline-0.02*(r['p1',]$val-r['p2',]$val), color='green')
             }
+
             myplot
         })
     })
@@ -175,21 +185,24 @@ savedServer = function(input, output, session, extrainput) {
         data = data.frame(time=as.numeric(names(avg)), val=as.numeric(avg))
         p1pos = which.max(data$val)
         p1 = data[p1pos, ]
-        p2 = data[which.min(data$val), ]
-        p0 = data[which.min(data[1:p1pos, ]$val), ]
+        p2pos = which.min(data$val)
+        p2 = data[p2pos, ]
+        leftside = data[1:p1pos, ]
+        rightside = data[p2pos:nrow(data), ]
+        p0 = data[which.min(leftside$val), ]
 
-        baseline = mean(data$val[1:25])
+        baseline = mean(data$val[1:50])
         t1 = NULL
         t2 = NULL
-        for(i in 1:nrow(data)) {
-            if(data[i,'val'] > baseline + 0.02*(p1$val-p2$val)) {
-                t1 = data[i,]
+        for(i in (nrow(leftside)-1):1) {
+            if(leftside[i, 'val'] < baseline + 0.02 * (p1$val - p2$val)) {
+                t1 = leftside[i,]
                 break
             }
         }
-        for(i in nrow(data):i) {
-            if(data[i,'val'] < baseline - 0.02*(p1$val-p2$val)) {
-                t2 = data[i,]
+        for(i in 1:nrow(rightside)) {
+            if(rightside[i, 'val'] > baseline - 0.02 * (p1$val - p2$val)) {
+                t2 = rightside[i,]
                 break
             }
         }
