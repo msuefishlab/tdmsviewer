@@ -241,6 +241,7 @@ homeServer = function(input, output, session, extrainput) {
         r = main$objects[[input$object]]
         t = r$time_track(start = s, end = e)
         dat = r$data
+        close(m)
 
         mysd = sd(dat)
         mymean = mean(dat)
@@ -251,6 +252,11 @@ homeServer = function(input, output, session, extrainput) {
         type = input$thresholdType
         val = input$thresholdValue
         obj = input$object
+
+        if(dir == 'none' & type == 'volts') {
+            output$txt <- renderText("Need to specify direction if using voltage cutoff")
+            return()
+        }
         for(i in 1:length(dat)) {
             ns = i - 1000
             ne = i + 1000
@@ -266,21 +272,19 @@ homeServer = function(input, output, session, extrainput) {
                         currTime = t[i]
                         savedPeaks = savedPeaks + 1
                         plusPeaks = plusPeaks + 1
-                    }
-                    if(dat[i] < mymean - mysd * val & (dir == 'none' | dir == 'negative')) {
+                    } else if(dat[i] < mymean - mysd * val & (dir == 'none' | dir == 'negative')) {
                         try(saveData(t[ns + which.min(dat[ns:ne])], f, obj, 1))
                         currTime = t[i]
                         savedPeaks = savedPeaks + 1
                         minusPeaks = minusPeaks + 1
                     }
                 } else if(type == 'volts') {
-                    if(dat[i] > val & (dir == 'none' | dir == 'positive')) {
+                    if(dat[i] > val & (dir == 'positive')) {
                         try(saveData(t[ns + which.max(dat[ns:ne])], f, obj, 0))
                         currTime = t[i]
                         savedPeaks = savedPeaks + 1
                         plusPeaks = plusPeaks + 1
-                    }
-                    if(dat[i] < val & (dir == 'none' | dir == 'negative')) {
+                    } else if(dat[i] < val & (dir == 'negative')) {
                         try(saveData(t[ns + which.min(dat[ns:ne])], f, obj, 1))
                         currTime = t[i]
                         savedPeaks = savedPeaks + 1
@@ -289,7 +293,6 @@ homeServer = function(input, output, session, extrainput) {
                 }
             }
         }
-        close(m)
         output$txt <- renderText(sprintf("Saved %d peaks (%d+, %d-)", savedPeaks, plusPeaks, minusPeaks))
     })
 

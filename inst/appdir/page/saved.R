@@ -16,14 +16,16 @@ savedUI = function(id) {
             checkboxInput(ns('average'), 'Average selected EOD(s)'),
             checkboxInput(ns('selectAll'), 'Select all'),
             downloadButton(ns('downloadData1'), 'Download waveform matrix'),
-            downloadButton(ns('downloadData2'), 'Download average waveform')
+            downloadButton(ns('downloadData2'), 'Download average waveform'),
+            actionButton(ns('analyzeWaveform'), 'Analyze waveform')
         ),
         mainPanel(
             DT::dataTableOutput(ns('table')),
             plotOutput(ns('plot'),
                 click = ns('plotClick'),
                 height = '700px'
-            )
+            ),
+            DT::dataTableOutput(ns('landmarks'))
         )
     )
 }
@@ -104,10 +106,22 @@ savedServer = function(input, output, session, extrainput) {
             }
 
             if(input$average) {
-                ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line')
+                myplot = ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line')
             } else {
-                ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line()
+                myplot = ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line()
             }
+
+            if(input$analyzeWaveform) {
+                r = myreact()
+                myplot = myplot + annotate("point", x = r['p0',]$time, y = r['p0',]$val, colour = "blue", size = 4)
+                myplot = myplot + annotate("point", x = r['p1',]$time, y = r['p1',]$val, colour = "red", size = 4)
+                myplot = myplot + annotate("point", x = r['p2',]$time, y = r['p2',]$val, colour = "darkgreen", size = 4)
+                myplot = myplot + annotate("point", x = r['t1',]$time, y = r['t1',]$val, colour = "orange", size = 4)
+                myplot = myplot + annotate("point", x = r['t2',]$time, y = r['t2',]$val, colour = "purple", size = 4)
+
+                output$landmarks = DT::renderDataTable(as.data.frame(r))
+            }
+            myplot
         })
     })
 
@@ -151,7 +165,40 @@ savedServer = function(input, output, session, extrainput) {
             write.csv(apply(ret, 1, mean), file, quote = F)
         }
     )
+    myreact = reactive({
+        input$analyzeWaveform
+        plotdata = dataMatrix()
+        ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate=mean)
+        avg = apply(ret, 1, mean)
+        data = data.frame(time=as.numeric(names(avg)), val=as.numeric(avg))
+        p1pos = which.max(data$val)
+        p1 = data[p1pos, ]
+        p2 = data[which.min(data$val), ]
+        p0 = data[which.min(data[1:p1pos, ]$val), ]
 
+        baseline = mean(data$val[1:25])
+        t1 = NULL
+        t2 = NULL
+        for(i in 1:nrow(data)) {
+            if(data[i,'val'] > baseline + 0.02*(p1$val-p2$val)) {
+                t1 = data[i,]
+                break
+            }
+        }
+        for(i in nrow(data):i) {
+            if(data[i,'val'] < baseline - 0.02*(p1$val-p2$val)) {
+                t2 = data[i,]
+                break
+            }
+        }
+        ret = data.frame(time=numeric(0), val=numeric(0))
+        ret['p0',] = p0
+        ret['p1',] = p1
+        ret['p2',] = p2
+        ret['t1',] = t1
+        ret['t2',] = t2
+        ret
+    })
     observeEvent(input$plotClick, {
         showModal(modalDialog(
             title = 'Landmark editor',
