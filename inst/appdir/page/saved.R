@@ -17,7 +17,7 @@ savedUI = function(id) {
             checkboxInput(ns('selectAll'), 'Select all'),
             downloadButton(ns('downloadData1'), 'Download waveform matrix'),
             downloadButton(ns('downloadData2'), 'Download average waveform'),
-            actionButton(ns('analyzeWaveform'), 'Analyze waveform')
+            actionButton(ns('analyzeWaveform'), 'Find landmarks')
         ),
         mainPanel(
             DT::dataTableOutput(ns('table')),
@@ -25,7 +25,8 @@ savedUI = function(id) {
                 click = ns('plotClick'),
                 height = '700px'
             ),
-            DT::dataTableOutput(ns('landmarks'))
+            DT::dataTableOutput(ns('landmarks')),
+            verbatimTextOutput(ns('stats'))
         )
     )
 }
@@ -120,6 +121,7 @@ savedServer = function(input, output, session, extrainput) {
                 myplot = myplot + annotate("point", x = r['t2',]$time, y = r['t2',]$val, colour = "purple", size = 4)
 
                 output$landmarks = DT::renderDataTable(as.data.frame(r))
+                output$stats = renderText(sprintf('P1-P2: %f\nT2-T1: %f', r['p1',]$val-r['p2',]$val, r['t2',]$time-r['t1',]$time))
             }
             myplot
         })
