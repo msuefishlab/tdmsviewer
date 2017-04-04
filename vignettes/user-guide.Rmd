@@ -35,24 +35,24 @@ To make sure you are installing the version mentioned in this guide, you
 can also run
 
 ```{r,eval = FALSE}
-install_github('msuefishlab/tdmsviewer@0.4.0')
+install_github('msuefishlab/tdmsviewer@0.5.0')
 ```
 
 But you might benefit from using the latest version
 
-### Windows 7/8 specific installation errors
+### Windows specific installation errors
 
-The install\_github function doesn’t work fully properly on Windows 7/8
-(works fine on Windows 10)
-
-On Windows 7/8, in my experience, the install\_github function it fails
-to install some dependencies, so you may have to install them manually.
+The install\_github function doesn’t work fully properly on Windows
+On Windows, the install\_github function it fails to install some dependencies,
+so you may have to install them manually.
 
 Possible dependencies you have to manually install includes
 
-install.packages(c('htmlwidgets','DT','RSQLite','Rcpp'))
+```{r, eval=FALSE}
+install.packages(c('htmlwidgets','DT','RSQLite','Rcpp', 'ggplot2'))
+```
 
-Note that this is only a problem on windows, other platforms will
+Note that this is only a problem on windows, other platforms should
 install all dependencies automatically when you use
 `install_github('msuefishlab/tdmsviewer')`
 
@@ -84,8 +84,8 @@ library(tdmsviewer)
 tdmsviewer(basedir="C:\\Users\\YourName\\Desktop\\FolderWithTDMS")
 ```
 
-By default the basedir is your home directory on Unix or My Documents
-folder on Windows
+By default the basedir is your home directory when using Linux/MacOS or
+the My Documents folder when using Windows
 
 #### Selecting TDMS files
 
@@ -93,15 +93,15 @@ The first thing to do to select TDMS files is to click the "Choose TDMS
 file" button. This will launch a file selector, and you will open a
 specific directory that contains TDMS files.
 
-![screenshot-127.0.0.1-4748-2017-03-29-15-51-50.png](./media/image1.png)
+![screenshot-127.0.0.1-4748-2017-03-29-15-51-50.png](./media/image0.png)
 
 Figure 1. "Choose TDMS file" button
 
-![screenshot-127.0.0.1-4748-2017-03-29-15-53-30.png](./media/image2.png)
+![screenshot-127.0.0.1-4748-2017-03-29-15-53-30.png](./media/image1.png)
 
 Figure 2. The "Choose TDMS file" file selector
 
-![screenshot-127.0.0.1-4748-2017-03-29-15-54-21.png](./media/image3.png)
+![screenshot-127.0.0.1-4748-2017-03-29-15-54-21.png](./media/image2.png)
 
 Figure 3. After selecting a file, it is automatically plotted over the
 range \[0-1\] seconds and metadata is displayed
@@ -149,7 +149,7 @@ This captures "positive" of "negative" peaks, and after the peak finder
 is fixed. The app will output a text that says "Saved N peaks, (x+, y-)"
 when complete (Figure 4)
 
-![screenshot-127.0.0.1-4748-2017-03-29-16-01-49.png](./media/image4.png)
+![screenshot-127.0.0.1-4748-2017-03-29-16-01-49.png](./media/image3.png)
 
 Figure 4. Selecting the "Save EODs in current view" captures EOD peaks
 using either the sigma or voltage threshold. A progress bar is displayed
@@ -161,12 +161,12 @@ After the EODs are saved using the peak finder, they will be saved to a
 SQLite database (which is persistent across sessions) and you will see a
 list of EODs on a table
 
-![screenshot-127.0.0.1-4748-2017-03-29-16-03-14.png](./media/image5.png)
+![screenshot-127.0.0.1-4748-2017-03-29-16-03-14.png](./media/image4.png)
 
 Figure 5. The "Saved EODs" tab shows a list of EOD that were captured by
 peak finding, and can display the EODs overlaid on each other
 
-![screenshot-127.0.0.1-4748-2017-03-29-16-05-32.png](./media/image6.png)
+![screenshot-127.0.0.1-4748-2017-03-29-16-05-32.png](./media/image5.png)
 
 Figure 6. After clicking "Select all" it will plot all waveforms on a
 single plot
@@ -203,18 +203,26 @@ EODs that match the "search" that you submitted
 For example, you can search part of the filename that you saved the EODs
 from or similar
 
-#### Landmark editing
+#### Finding landmarks on the "Saved EODs" tab
 
-To identify landmarks, you can interactively click on points of the plot
-in the "Saved EODs" tab, and a dialog box will appear asking you if you
-want to save this time point as a landmark.
+To identify landmarks, you can click the "Find landmarks" button which
+will automatically identify the main landmarks
+
+![screenshot-127.0.0.1-4748-2017-03-29-16-11-20.png](./media/image6.png)
+
+Figure 7. Plot of average waveform before identifying waveforms
+
 
 ![screenshot-127.0.0.1-4748-2017-03-29-16-11-20.png](./media/image7.png)
 
-Figure 7. Dialog box appears when clicking on a point of the Saved EODs
-plot. Here we identify the largest peak as P1, and give it a name
+Figure 8. Waveform after clicking "Find landmarks" button
 
-#### Landmark evaluation
+
+![screenshot-127.0.0.1-4748-2017-03-29-16-22-08.png](./media/image8.png)
+
+Figure 9. Giving a name for your landmarks which is used on the "Landmarks" tab
+
+#### Evaluating landmarks in the "Landmarks" tab
 
 The "Landmarks" tab of the application allows you to view data about the
 annotated landmarks for a given set of waveforms.
@@ -228,9 +236,9 @@ landmarks for larval recordings, adult recordings, etc). The result will
 be a plot of the voltage values at that particular location, and a
 textual output of the mean and stddev of the voltage values
 
-![screenshot-127.0.0.1-4748-2017-03-29-16-22-08.png](./media/image8.png)
+![screenshot-127.0.0.1-4748-2017-03-29-16-22-08.png](./media/image9.png)
 
-Figure 8. Overview of the "Landmark" plots the voltage value for multiple
+Figure 10. Overview of the "Landmark" plots the voltage value for multiple
 EOD waveforms at the annotated points that are given
 
 ## Conclusion
