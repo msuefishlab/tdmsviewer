@@ -243,15 +243,14 @@ savedServer = function(input, output, session, extrainput) {
                 s2 = middle[i, ]
             }
         }
-        ret = data.frame(landmark=character(0), time=numeric(0), val=numeric(0))
 
-        ret=rbind(ret,data.frame(landmark='p0',time=p0$time,val=p0$val))
-        ret=rbind(ret,data.frame(landmark='p1',time=p1$time,val=p1$val))
-        ret=rbind(ret,data.frame(landmark='p2',time=p2$time,val=p2$val))
-        ret=rbind(ret,data.frame(landmark='t1',time=t1$time,val=t1$val))
-        ret=rbind(ret,data.frame(landmark='t2',time=t2$time,val=t2$val))
-        ret=rbind(ret,data.frame(landmark='s1',time=s1$time,val=s1$val))
-        ret=rbind(ret,data.frame(landmark='s2',time=s2$time,val=s2$val))
+        ret = data.frame(landmark = 'p0', time = p0$time, val = p0$val)
+        ret = rbind(ret, data.frame(landmark = 'p1', time = p1$time, val = p1$val))
+        ret = rbind(ret, data.frame(landmark = 'p2', time = p2$time, val = p2$val))
+        ret = rbind(ret, data.frame(landmark = 't1', time = t1$time, val = t1$val))
+        ret = rbind(ret, data.frame(landmark = 't2', time = t2$time, val = t2$val))
+        ret = rbind(ret, data.frame(landmark = 's1', time = s1$time, val = s1$val))
+        ret = rbind(ret, data.frame(landmark = 's2', time = s2$time, val = s2$val))
         ret
     })
 
