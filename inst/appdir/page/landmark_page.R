@@ -13,7 +13,8 @@ landmarkpageUI = function(id) {
         mainPanel(
             DT::dataTableOutput(ns('table')),
             plotOutput(ns('plotvals')),
-            verbatimTextOutput(ns('textvals'))
+            DT::dataTableOutput(ns('textvals')),
+            uiOutput(ns('saveStats'))
         )
     )
 }
@@ -28,7 +29,11 @@ landmarkpageServer = function(input, output, session, extrainput) {
         }
     }, priority = 1)
 
-    output$textvals = renderText({
+    output$textvals = DT::renderDataTable({
+        calculatedStats()
+    })
+
+    calculatedStats = reactive({
         ret = loadLandmarks()
         ret = ret[ret$description == input$eodDescription, ]
 
@@ -40,15 +45,14 @@ landmarkpageServer = function(input, output, session, extrainput) {
         mytime = df$X
         df <- subset(df, select = -c(X) )
 
-        newdf = apply(ret, 1, function(row) {
+        do.call(rbind, lapply(1:nrow(ret), function(i) {
+            row = ret[i, ]
             landmark_pos = which.min(abs(mytime - as.numeric(row[2])))
-            df[landmark_pos,]
-        })
-        newdf = do.call(rbind, newdf)
-        ret = lapply(1:nrow(newdf), function(i) {
-            sprintf('Output %s: val %f (sd %f)', ret[i, ]$landmark, mean(as.numeric(newdf[i, ])), sd(newdf[i, ]))
-        })
-        paste0(ret, collapse = '\n')
+            r = df[landmark_pos,]
+            print(r)
+            print(mean(as.numeric(r)))
+            data.frame(landmark = row$landmark, mean = mean(as.numeric(r)), sd = sd(r))
+        }))
     })
     output$plotvals = renderPlot({
         ret = loadLandmarks()
@@ -58,18 +62,18 @@ landmarkpageServer = function(input, output, session, extrainput) {
         if(is.null(inFile)) {
            return ()
         }
-        df = read.csv(inFile$datapath, stringsAsFactors=F)
+        df = read.csv(inFile$datapath, stringsAsFactors = F)
         mytime = df$X
         df <- subset(df, select = -c(X) )
 
         newdf = apply(ret, 1, function(row) {
             landmark_pos = which.min(abs(mytime - as.numeric(row[2])))
-            df[landmark_pos,]
+            df[landmark_pos, ]
         })
         newdf = do.call(rbind, newdf)
         newdf$landmark = ret$landmark
         newdf = melt(newdf)
-        ggplot(newdf, aes(landmark, value,  fill = landmark)) + geom_jitter(width = 0.1, height = 0.1)
+        ggplot(newdf, aes(landmark, value,  color = landmark)) + geom_jitter(width = 0.1) + scale_colour_brewer(palette = "Set1")
 
     })
 
@@ -81,6 +85,19 @@ landmarkpageServer = function(input, output, session, extrainput) {
         ret = ret[ret$description == input$eodDescription, ]
         ret
     })
+ 
+    output$saveStats <- renderUI({
+        if(!is.null(input$file)) {
+            downloadButton(session$ns('saveStatsButton'), 'Download table (CSV)')
+        }
+    })
 
+    output$saveStatsButton = downloadHandler(
+        filename = 'stats.csv',
+        content = function(file) {
+            ret = calculatedStats()
+            write.csv(ret, file, quote = F)
+        }
+    )
 }
 

@@ -54,6 +54,7 @@ server = function(input, output, session) {
             'saved-table_rows_selected',
             'saved-deleteButton',
             'saved-analyzeWaveform',
+            'saved-saveLandmarksButton',
             'saved-landmark-save_landmark',
             'saved-landmark-time_value',
             'saved-landmark-landmark',

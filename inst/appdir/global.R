@@ -50,7 +50,7 @@ saveLandmark = function(landmark, value, description) {
 
 loadLandmarks = function() {
     db = dbConnect(SQLite(), sqlitePath)
-    query = sprintf("SELECT * FROM %s", table2)
+    query = sprintf("SELECT landmark, value, description FROM %s", table2)
     data = dbGetQuery(db, query)
     dbDisconnect(db)
     data

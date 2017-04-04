@@ -7,7 +7,7 @@ savedUI = function(id) {
         sidebarPanel(
             h2('Saved EODs'),
             p('Select one or multiple EOD selections to plot them on the same axis'),
-            sliderInput(ns('windowSize'), label = 'Window size', value = 0.001, min = 0.000001, max = 0.1, step = 0.000001, width='200px'),
+            sliderInput(ns('windowSize'), label = 'Window size', value = 0.005, min = 0.000001, max = 0.1, step = 0.000001, width='200px'),
             actionButton(ns('deleteButton'), 'Delete selected EOD(s)'),
             actionButton(ns('deleteAll'), 'Delete all EODs'),
             checkboxInput(ns('normalize'), 'Normalize selected EOD(s)'),
@@ -15,10 +15,10 @@ savedUI = function(id) {
             checkboxInput(ns('postBaselineSubtract'), 'Post-normalization baseline subtract'),
             checkboxInput(ns('average'), 'Average selected EOD(s)'),
             checkboxInput(ns('selectAll'), 'Select all'),
+            checkboxInput(ns('drawTwoPercent'), 'Draw 2% lines'),
             downloadButton(ns('downloadData1'), 'Download waveform matrix'),
             downloadButton(ns('downloadData2'), 'Download average waveform'),
-            actionButton(ns('analyzeWaveform'), 'Find landmarks'),
-            actionButton(ns('saveLandmarks'), 'Save landmarks')
+            actionButton(ns('analyzeWaveform'), 'Find landmarks')
         ),
         mainPanel(
             DT::dataTableOutput(ns('table')),
@@ -27,7 +27,9 @@ savedUI = function(id) {
                 height = '700px'
             ),
             DT::dataTableOutput(ns('landmarks')),
-            verbatimTextOutput(ns('stats'))
+            verbatimTextOutput(ns('stats')),
+            verbatimTextOutput(ns('saved')),
+            uiOutput(ns('saveLandmarks'))
         )
     )
 }
@@ -110,35 +112,42 @@ savedServer = function(input, output, session, extrainput) {
             if(input$average) {
                 myplot = ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line')
             } else {
+                print(plotdata)
                 myplot = ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line()
             }
 
             if(input$analyzeWaveform) {
                 r = myreact()
-                myplot = myplot + annotate("point", x = r['p0',]$time, y = r['p0',]$val, colour = "blue", size = 4)
-                myplot = myplot + annotate("point", x = r['p1',]$time, y = r['p1',]$val, colour = "red", size = 4)
-                myplot = myplot + annotate("point", x = r['p2',]$time, y = r['p2',]$val, colour = "darkgreen", size = 4)
-                myplot = myplot + annotate("point", x = r['t1',]$time, y = r['t1',]$val, colour = "orange", size = 4)
-                myplot = myplot + annotate("point", x = r['t2',]$time, y = r['t2',]$val, colour = "purple", size = 4)
-                myplot = myplot + annotate("point", x = r['t2',]$time, y = r['t2',]$val, colour = "purple", size = 4)
-                myplot = myplot + annotate("point", x = r['s1',]$time, y = r['s1',]$val, colour = "grey", size = 4)
-                myplot = myplot + annotate("point", x = r['s2',]$time, y = r['s2',]$val, colour = "white", size = 4)
+                myplot = myplot + geom_point(data = r, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1")
 
-                output$landmarks = DT::renderDataTable(as.data.frame(r))
-                output$stats = renderText(sprintf('P1-P2: %f\nT2-T1: %f', r['p1',]$val-r['p2',]$val, r['t2',]$time-r['t1',]$time))
+                output$landmarks = DT::renderDataTable(r)
+                output$stats = renderText(sprintf('P1-P2: %f\nT2-T1: %f',
+                    r[r$landmark=='p1',]$val - r[r$landmark=='p2',]$val,
+                    r[r$landmark=='t2',]$time - r[r$landmark=='t1',]$time)
+                )
 
-                ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate=mean)
-                avg = apply(ret, 1, mean)
-                data = data.frame(time=as.numeric(names(avg)), val=as.numeric(avg))
 
-                baseline = mean(data$val[1:50])
-                myplot = myplot + geom_hline(yintercept = baseline, color='red')
-                myplot = myplot + geom_hline(yintercept = baseline+0.02*(r['p1',]$val-r['p2',]$val), color='yellow')
-                myplot = myplot + geom_hline(yintercept = baseline-0.02*(r['p1',]$val-r['p2',]$val), color='green')
+                if(input$drawTwoPercent) {
+                    ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
+                    avg = apply(ret, 1, mean)
+                    data = data.frame(time=as.numeric(names(avg)), val=as.numeric(avg))
+
+                    baseline = mean(data$val[1:50])
+                    myplot = myplot + geom_hline(yintercept = baseline, color = 'red')
+                    myplot = myplot + geom_hline(yintercept = baseline + 0.02 * (r[r$landmark=='p1',]$val - r[r$landmark=='p2',]$val), color = 'yellow')
+                    myplot = myplot + geom_hline(yintercept = baseline - 0.02 * (r[r$landmark=='p1',]$val - r[r$landmark=='p2',]$val), color = 'green')
+                }
             }
 
             myplot
         })
+    })
+
+    
+    output$saveLandmarks <- renderUI({
+        if(input$analyzeWaveform) {
+            actionButton(session$ns('saveLandmarksButton'), 'Save landmarks')
+        }
     })
 
     observeEvent(input$deleteButton, {
@@ -168,7 +177,7 @@ savedServer = function(input, output, session, extrainput) {
         filename = 'matrix.csv',
         content = function(file) {
             plotdata = dataMatrix()
-            ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate=mean)
+            ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
             write.csv(ret, file, quote = F)
         }
     )
@@ -177,16 +186,16 @@ savedServer = function(input, output, session, extrainput) {
         filename = 'average.csv',
         content = function(file) {
             plotdata = dataMatrix()
-            ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate=mean)
+            ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
             write.csv(apply(ret, 1, mean), file, quote = F)
         }
     )
     myreact = reactive({
         input$analyzeWaveform
         plotdata = dataMatrix()
-        ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate=mean)
+        ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
         avg = apply(ret, 1, mean)
-        data = data.frame(time=as.numeric(names(avg)), val=as.numeric(avg))
+        data = data.frame(time = as.numeric(names(avg)), val = as.numeric(avg))
         p1pos = which.max(data$val)
         p1 = data[p1pos, ]
         p2pos = which.min(data$val)
@@ -234,23 +243,25 @@ savedServer = function(input, output, session, extrainput) {
                 s2 = middle[i, ]
             }
         }
-        ret = data.frame(time=numeric(0), val=numeric(0))
-        ret['p0',] = p0
-        ret['p1',] = p1
-        ret['p2',] = p2
-        ret['t1',] = t1
-        ret['t2',] = t2
-        ret['s1',] = s1
-        ret['s2',] = s2
+        ret = data.frame(landmark=character(0), time=numeric(0), val=numeric(0))
+
+        ret=rbind(ret,data.frame(landmark='p0',time=p0$time,val=p0$val))
+        ret=rbind(ret,data.frame(landmark='p1',time=p1$time,val=p1$val))
+        ret=rbind(ret,data.frame(landmark='p2',time=p2$time,val=p2$val))
+        ret=rbind(ret,data.frame(landmark='t1',time=t1$time,val=t1$val))
+        ret=rbind(ret,data.frame(landmark='t2',time=t2$time,val=t2$val))
+        ret=rbind(ret,data.frame(landmark='s1',time=s1$time,val=s1$val))
+        ret=rbind(ret,data.frame(landmark='s2',time=s2$time,val=s2$val))
         ret
     })
 
-    observeEvent(input$saveLandmarks, {
+    observeEvent(input$saveLandmarksButton, {
         landmarks = myreact()
-        for(name in names(landmarks)) {
-            val = landmarks[[name]]
-            saveLandmark(name, val$time, 'peaks')
+        for(i in 1:nrow(landmarks)) {
+            val = landmarks[i, ]
+            try(saveLandmark(val$landmark, val$time, 'peaks'))
         }
+        output$saved <- renderText(sprintf('Saved %d landmarks', nrow(landmarks)))
     })
 }
 
