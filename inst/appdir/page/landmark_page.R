@@ -49,8 +49,6 @@ landmarkpageServer = function(input, output, session, extrainput) {
             row = ret[i, ]
             landmark_pos = which.min(abs(mytime - as.numeric(row[2])))
             r = df[landmark_pos,]
-            print(r)
-            print(mean(as.numeric(r)))
             data.frame(landmark = row$landmark, mean = mean(as.numeric(r)), sd = sd(r))
         }))
     })
@@ -99,5 +97,11 @@ landmarkpageServer = function(input, output, session, extrainput) {
             write.csv(ret, file, quote = F)
         }
     )
+
+    observe({
+        extrainput$landmarkSave
+        input$deleteAll
+        updateSelectInput(session, 'eodDescription', choices = loadLandmarks()$description)
+    })
 }
 

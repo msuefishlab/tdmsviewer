@@ -34,8 +34,6 @@ savedUI = function(id) {
     )
 }
 savedServer = function(input, output, session, extrainput) {
-    source('page/landmark_dialog.R', local = T)
-
     dataMatrix = reactive({
         if(!input$selectAll && is.null(input$table_rows_selected)) {
             return()
@@ -112,7 +110,6 @@ savedServer = function(input, output, session, extrainput) {
             if(input$average) {
                 myplot = ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line')
             } else {
-                print(plotdata)
                 myplot = ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line()
             }
 
@@ -255,12 +252,26 @@ savedServer = function(input, output, session, extrainput) {
     })
 
     observeEvent(input$saveLandmarksButton, {
+        showModal(modalDialog(
+            title = 'Create name for landmark set',
+            easyClose = T,
+            tagList(
+                textInput(session$ns('landmarkSet'), 'Landmark set ID'),
+                actionButton(session$ns('landmarkSave'), 'Save')
+            )
+        ))
+        
+    })
+    observeEvent(input$landmarkSave, {
+        removeModal()
         landmarks = myreact()
         for(i in 1:nrow(landmarks)) {
             val = landmarks[i, ]
-            try(saveLandmark(val$landmark, val$time, 'peaks'))
+            try(saveLandmark(val$landmark, val$time, input$landmarkSet))
         }
         output$saved <- renderText(sprintf('Saved %d landmarks', nrow(landmarks)))
     })
+
+    return (input)
 }
 

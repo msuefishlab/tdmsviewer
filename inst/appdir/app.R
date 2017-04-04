@@ -35,9 +35,9 @@ server = function(input, output, session) {
     source('page/help.R', local = T)
     source('page/landmark_page.R', local = T)
     extrainput = callModule(homeServer, 'home', input)
-    callModule(savedServer, 'saved', extrainput)
+    moreinput = callModule(savedServer, 'saved', extrainput)
     callModule(helpServer, 'help')
-    callModule(landmarkpageServer, 'landmarkpage')
+    callModule(landmarkpageServer, 'landmarkpage', moreinput)
     observe({
         reactiveValuesToList(input)
         session$doBookmark()
