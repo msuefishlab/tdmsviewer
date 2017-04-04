@@ -1,6 +1,8 @@
 ## Version 0.5.0 - April 4th, 2017
 
-- Add automatic landmark identification
+- Add automatic landmark identification and labeling
+- Add download of mean and stddev landmark values
+- Add basic in-app help guide
 
 ## Version 0.4.1 - March 30th, 2017
 
