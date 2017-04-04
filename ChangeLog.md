@@ -1,3 +1,7 @@
+## Version 0.5.0 - April 4th, 2017
+
+- Add automatic landmark identification
+
 ## Version 0.4.1 - March 30th, 2017
 
 - Updated DESCRIPTION

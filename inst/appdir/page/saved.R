@@ -17,7 +17,8 @@ savedUI = function(id) {
             checkboxInput(ns('selectAll'), 'Select all'),
             downloadButton(ns('downloadData1'), 'Download waveform matrix'),
             downloadButton(ns('downloadData2'), 'Download average waveform'),
-            actionButton(ns('analyzeWaveform'), 'Find landmarks')
+            actionButton(ns('analyzeWaveform'), 'Find landmarks'),
+            actionButton(ns('saveLandmarks'), 'Save landmarks')
         ),
         mainPanel(
             DT::dataTableOutput(ns('table')),
@@ -119,6 +120,9 @@ savedServer = function(input, output, session, extrainput) {
                 myplot = myplot + annotate("point", x = r['p2',]$time, y = r['p2',]$val, colour = "darkgreen", size = 4)
                 myplot = myplot + annotate("point", x = r['t1',]$time, y = r['t1',]$val, colour = "orange", size = 4)
                 myplot = myplot + annotate("point", x = r['t2',]$time, y = r['t2',]$val, colour = "purple", size = 4)
+                myplot = myplot + annotate("point", x = r['t2',]$time, y = r['t2',]$val, colour = "purple", size = 4)
+                myplot = myplot + annotate("point", x = r['s1',]$time, y = r['s1',]$val, colour = "grey", size = 4)
+                myplot = myplot + annotate("point", x = r['s2',]$time, y = r['s2',]$val, colour = "white", size = 4)
 
                 output$landmarks = DT::renderDataTable(as.data.frame(r))
                 output$stats = renderText(sprintf('P1-P2: %f\nT2-T1: %f', r['p1',]$val-r['p2',]$val, r['t2',]$time-r['t1',]$time))
@@ -188,15 +192,22 @@ savedServer = function(input, output, session, extrainput) {
         p2pos = which.min(data$val)
         p2 = data[p2pos, ]
         leftside = data[1:p1pos, ]
+        middle = data[p1pos:p2pos, ]
         rightside = data[p2pos:nrow(data), ]
-        p0 = data[which.min(leftside$val), ]
+        p0pos = which.min(leftside$val)
+        p0 = data[p0pos, ]
 
-        baseline = mean(data$val[1:50])
+        baseline = mean(data$val[1:25])
         t1 = NULL
         t2 = NULL
-        for(i in (nrow(leftside)-1):1) {
+        slope1 = NULL
+        slope2 = NULL
+        s1 = NULL
+        s2 = NULL
+        for(i in nrow(leftside):1) {
             if(leftside[i, 'val'] < baseline + 0.02 * (p1$val - p2$val)) {
                 t1 = leftside[i,]
+                slope1 = leftside[i:nrow(leftside), ]
                 break
             }
         }
@@ -206,21 +217,40 @@ savedServer = function(input, output, session, extrainput) {
                 break
             }
         }
+
+        slope1_max = -100000
+        for(i in 1:(nrow(slope1)-1)) {
+            s = (slope1[i+1, 'val'] - slope1[i, 'val']) / (slope1[i+1, 'time'] - slope1[i, 'time'])
+            if(s > slope1_max) {
+                slope1_max = s
+                s1 = slope1[i,]
+            }
+        }
+        slope2_max = 100000
+        for(i in 1:(nrow(middle)-1)) {
+            s = (middle[i+1, 'val'] - middle[i, 'val']) / (middle[i+1, 'time'] - middle[i, 'time'])
+            if(s < slope2_max) {
+                slope2_max = s
+                s2 = middle[i, ]
+            }
+        }
         ret = data.frame(time=numeric(0), val=numeric(0))
         ret['p0',] = p0
         ret['p1',] = p1
         ret['p2',] = p2
         ret['t1',] = t1
         ret['t2',] = t2
+        ret['s1',] = s1
+        ret['s2',] = s2
         ret
     })
-    observeEvent(input$plotClick, {
-        showModal(modalDialog(
-            title = 'Landmark editor',
-            easyClose = T,
-            landmarkUI(session$ns('landmark'))
-        ))
+
+    observeEvent(input$saveLandmarks, {
+        landmarks = myreact()
+        for(name in names(landmarks)) {
+            val = landmarks[[name]]
+            saveLandmark(name, val$time, 'peaks')
+        }
     })
-    callModule(landmarkServer, 'landmark')
 }
 
