@@ -132,7 +132,7 @@ homeServer = function(input, output, session, extrainput) {
         datatable = dataInput()
         r = datatable$objects[[input$object]]
         max = r$number_values * r$properties[['wf_increment']]
-        sliderInput(session$ns('sliderRange'), 'Range', min = 0, max = ceiling(max), value = c(ranges$xmin, ranges$xmax), step = 0.00001, width = '100%', round = T)
+        sliderInput(session$ns('sliderRange'), 'Range', min = 0, max = ceiling(max), value = c(0, 1), step = 0.00001, width = '100%', round = T)
     })
 
 
