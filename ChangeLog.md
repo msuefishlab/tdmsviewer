@@ -1,3 +1,8 @@
+## Version 0.5.2 - April 7th, 2017
+
+- Identify zc1 and zc2 baseline crossing timepoints
+- Only identify p0 within 0.5ms of the zc1 timepoint
+
 ## Version 0.5.1 - April 7th, 2017
 
 - Improve performance on the "Saved EODs" by applying normalization/transformations on already-loaded data instead of reloading every time
