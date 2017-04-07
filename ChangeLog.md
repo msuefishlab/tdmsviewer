@@ -1,3 +1,8 @@
+## Version 0.5.1 - April 7th, 2017
+
+- Improve performance on the "Saved EODs" by applying normalization/transformations on already-loaded data instead of reloading every time
+- Fix issue with the TDMS file view jumping around
+
 ## Version 0.5.0 - April 4th, 2017
 
 - Add automatic landmark identification and labeling

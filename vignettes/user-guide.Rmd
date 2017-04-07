@@ -35,7 +35,7 @@ To make sure you are installing the version mentioned in this guide, you
 can also run
 
 ```{r,eval = FALSE}
-install_github('msuefishlab/tdmsviewer@0.5.0')
+install_github('msuefishlab/tdmsviewer@0.5.1')
 ```
 
 But you might benefit from using the latest version

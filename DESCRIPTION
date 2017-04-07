@@ -1,7 +1,7 @@
 Package: tdmsviewer
 Type: Package
 Title: View TDMS files as a RShiny app
-Version: 0.5.0
+Version: 0.5.1
 Authors@R: c(
     person("Colin", "Diesh", email = "dieshcol@msu.edu", role = c("cre", "aut")))
 Maintainer: Colin Diesh <dieshcol@msu.edu>
