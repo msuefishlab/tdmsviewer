@@ -34,7 +34,7 @@ savedUI = function(id) {
     )
 }
 savedServer = function(input, output, session, extrainput) {
-    dataMatrix = reactive({
+    dataMatrixPre = reactive({
         if(!input$selectAll && is.null(input$table_rows_selected)) {
             return()
         }
@@ -74,10 +74,20 @@ savedServer = function(input, output, session, extrainput) {
             t = t - ret[i, ]$start
             dat = r$data
             close(myFile)
-
             if(ret[i, ]$inverted) {
                 dat = -dat
             }
+
+            # rounding important here to avoid different values being collapsed. significant digits may change on sampling rate of tdms
+            plotdata = rbind(plotdata, data.frame(col = ret[i, ]$start, time = round(t, digits=5), data = dat))
+        }
+        plotdata
+    })
+    dataMatrix = reactive({
+        ret = dataMatrixPre()
+
+        for(i in unique(ret$col)) {
+            dat = ret[ret$col == i, ]$data
             if(input$preBaselineSubtract) {
                 dat = dat - mean(dat[1:25])
             }
@@ -87,10 +97,9 @@ savedServer = function(input, output, session, extrainput) {
             if(input$postBaselineSubtract) {
                 dat = dat - mean(dat[1:25])
             }
-            # rounding important here to avoid different values being collapsed. significant digits may change on sampling rate of tdms
-            plotdata = rbind(plotdata, data.frame(col = ret[i, ]$start, time = round(t, digits=5), data = dat))
+            ret[ret$col == i, ]$data = dat
         }
-        plotdata
+        ret
     })
 
     output$table = DT::renderDataTable({
