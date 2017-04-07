@@ -209,16 +209,26 @@ savedServer = function(input, output, session, extrainput) {
         leftside = data[1:p1pos, ]
         middle = data[p1pos:p2pos, ]
         rightside = data[p2pos:nrow(data), ]
-        p0pos = which.min(leftside$val)
-        p0 = data[p0pos, ]
 
         baseline = mean(data$val[1:25])
+        p0 = NULL
         t1 = NULL
         t2 = NULL
         slope1 = NULL
         slope2 = NULL
         s1 = NULL
         s2 = NULL
+        zc1 = NULL
+        zc2 = NULL
+        for(i in nrow(leftside):1) {
+            if(leftside[i, 'val'] < baseline) {
+                zc1 = leftside[i,]
+                tzc1 = zc1$time
+                p0calculator = leftside[leftside$time >= tzc1-0.0005 & leftside$time <= tzc1,]
+                p0 = p0calculator[which.min(p0calculator$val), ]
+                break
+            }
+        }
         for(i in nrow(leftside):1) {
             if(leftside[i, 'val'] < baseline + 0.02 * (p1$val - p2$val)) {
                 t1 = leftside[i,]
@@ -249,6 +259,14 @@ savedServer = function(input, output, session, extrainput) {
                 s2 = middle[i, ]
             }
         }
+        for(i in 1:nrow(middle)) {
+            if(middle[i, 'val'] < baseline) {
+                zc2 = middle[i,]
+                break
+            }
+        }
+
+
 
         ret = data.frame(landmark = 'p0', time = p0$time, val = p0$val)
         ret = rbind(ret, data.frame(landmark = 'p1', time = p1$time, val = p1$val))
@@ -257,6 +275,8 @@ savedServer = function(input, output, session, extrainput) {
         ret = rbind(ret, data.frame(landmark = 't2', time = t2$time, val = t2$val))
         ret = rbind(ret, data.frame(landmark = 's1', time = s1$time, val = s1$val))
         ret = rbind(ret, data.frame(landmark = 's2', time = s2$time, val = s2$val))
+        ret = rbind(ret, data.frame(landmark = 'zc1', time = zc1$time, val = zc1$val))
+        ret = rbind(ret, data.frame(landmark = 'zc2', time = zc2$time, val = zc2$val))
         ret
     })
 
