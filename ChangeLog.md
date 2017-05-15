@@ -1,3 +1,7 @@
+## Version next
+
+- Fix issues with shinyFiles
+
 ## Version 0.5.2 - April 7th, 2017
 
 - Identify zc1 and zc2 baseline crossing timepoints

@@ -1,41 +1,43 @@
 
-homeSidebarUI = function(id) {
+homeUI = function(id) {
     ns = NS(id)
-    tagList(
-        textInput(ns('tdmsfile'), 'TDMS File'),
-        uiOutput(ns('objects')),
-        uiOutput('TDMS file properties'),
-        uiOutput(ns('distPropertiesLabel')),
-        verbatimTextOutput(ns('distProperties')),
-        uiOutput(ns('distChannelLabel')),
-        verbatimTextOutput(ns('distChannel')),
-        radioButtons(ns('thresholdType'), 'Threshold type:', c('Sigma' = 'sigma', 'Voltage cutoff' = 'volts')),
-        radioButtons(ns('thresholdDirection'), 'Threshold direction:', c('None' = 'none', 'Positive' = 'positive', 'Negative' = 'negative')),
-        numericInput(ns('thresholdValue'), label = 'Threshold value', value = 5)
-    )
-}
-homeMainUI = function(id) {
-    ns = NS(id)
-    tagList(
-        p('Zoom in/Zoom out'),
-        actionButton(ns('zoomIn'), label = '+'),
-        actionButton(ns('zoomOut'), label = '-'),
-        actionButton(ns('moveLeft'), label = '<'),
-        actionButton(ns('moveRight'), label = '>'),
-        actionButton(ns('saveAll'), label = 'Save EODs in current view'),
-        uiOutput(ns('sliderOutput')),
-        plotOutput(ns('distPlot'),
-            brush = brushOpts(
-                id = ns('plotBrush'),
-                resetOnNew = T,
-                direction = 'x'
-            )
+    sidebarLayout(
+        sidebarPanel(
+            shinyFiles::shinyFilesButton(ns('file'), label = 'Choose TDMS file', title = 'Please select a TDMS file', multiple = F),
+            textInput(ns('tdmsfile'), 'TDMS File'),
+            uiOutput(ns('objects')),
+            uiOutput('TDMS file properties'),
+            uiOutput(ns('distPropertiesLabel')),
+            verbatimTextOutput(ns('distProperties')),
+            uiOutput(ns('distChannelLabel')),
+            verbatimTextOutput(ns('distChannel')),
+            radioButtons(ns('thresholdType'), 'Threshold type:', c('Sigma' = 'sigma', 'Voltage cutoff' = 'volts')),
+            radioButtons(ns('thresholdDirection'), 'Threshold direction:', c('None' = 'none', 'Positive' = 'positive', 'Negative' = 'negative')),
+            numericInput(ns('thresholdValue'), label = 'Threshold value', value = 5)
         ),
-        verbatimTextOutput(ns('txt')),
-        verbatimTextOutput(ns('txt2'))
+        mainPanel(
+            p('Zoom in/Zoom out'),
+            actionButton(ns('zoomIn'), label = '+'),
+            actionButton(ns('zoomOut'), label = '-'),
+            actionButton(ns('moveLeft'), label = '<'),
+            actionButton(ns('moveRight'), label = '>'),
+            actionButton(ns('saveAll'), label = 'Save EODs in current view'),
+            uiOutput(ns('sliderOutput')),
+            plotOutput(ns('distPlot'),
+                brush = brushOpts(
+                    id = ns('plotBrush'),
+                    resetOnNew = T,
+                    direction = 'x'
+                )
+            ),
+            verbatimTextOutput(ns('txt')),
+            verbatimTextOutput(ns('txt2'))
+        )
     )
 }
 homeServer = function(input, output, session, extrainput) {
+
+    shinyFiles::shinyFileChoose(input, 'file', session = session, roots = c(home = basedir))
     dataInput = reactive({
         withProgress(message = 'Loading...', value = 0, {
             f = input$tdmsfile

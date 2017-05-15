@@ -5,7 +5,7 @@ landmarkpageUI = function(id) {
         sidebarPanel(
             h2('Saved landmarks'),
             p('View landmark data'),
-            fileInput(ns('file'), 'Upload EOD data', multiple = FALSE),
+            fileInput(ns('file2'), 'Upload EOD data', multiple = FALSE),
             actionButton(ns('refresh'), 'Refresh'),
             actionButton(ns('deleteAll'), 'Delete landmark(s)'),
             selectInput(ns('eodDescription'), 'EOD description', unique(loadLandmarks()$description))
