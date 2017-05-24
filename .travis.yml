@@ -1,2 +1,5 @@
 sudo: false
 language: r
+r:
+    - 3.3.0
+    - 3.4.0
