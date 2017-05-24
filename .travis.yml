@@ -1,5 +1,6 @@
 sudo: false
 language: r
+r_github_packages: hadley/devtools@1.13.0
 r:
     - 3.3.0
     - 3.4.0
