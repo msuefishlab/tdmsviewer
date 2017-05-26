@@ -35,7 +35,7 @@ homeUI = function(id) {
         )
     )
 }
-homeServer = function(input, output, session, extrainput) {
+homeServer = function(input, output, session) {
 
     shinyFiles::shinyFileChoose(input, 'file', session = session, roots = c(home = basedir))
     dataInput = reactive({
@@ -105,7 +105,7 @@ homeServer = function(input, output, session, extrainput) {
     })
 
     observe({
-        d = extrainput$file$files[[1]]
+        d = input$file$files[[1]]
         if(is.null(d)) {
             return()
         }
