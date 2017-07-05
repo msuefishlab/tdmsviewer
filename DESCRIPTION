@@ -13,7 +13,8 @@ Imports:
     shiny (>= 0.14.2),
     DT (>= 0.2),
     shinyFiles (>= 0.6.2),
-    tdmsreader (>= 0.1.1),
+    tdmsreader (>= 0.1.2),
+    eodplotter (>= 0.0.3),
     RSQLite (>= 1.1),
     ggplot2 (>= 2.1.0)
 Suggests:
