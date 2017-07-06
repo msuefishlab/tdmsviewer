@@ -11,7 +11,6 @@ homeUI = function(id) {
             verbatimTextOutput(ns('distProperties')),
             uiOutput(ns('distChannelLabel')),
             verbatimTextOutput(ns('distChannel')),
-            radioButtons(ns('thresholdType'), 'Threshold type:', c('Sigma' = 'sigma', 'Voltage cutoff' = 'volts')),
             radioButtons(ns('thresholdDirection'), 'Threshold direction:', c('None' = 'none', 'Positive' = 'positive', 'Negative' = 'negative')),
             numericInput(ns('thresholdValue'), label = 'Threshold value', value = 5)
         ),
@@ -195,7 +194,9 @@ homeServer = function(input, output, session) {
 
     observeEvent(input$saveAll, {
         p = eodplotter::peakFinder(filename = input$tdmsfile, channel = input$object, direction = input$direction, threshold = input$thresholdValue, start = ranges$xmin, end = ranges$xmax)
-        print(p)
+        apply(p, 1, function(r) {
+            saveData(start = r[1], inverted = r[2], file = input$tdmsfile, object = input$object)
+        })
     })
 
     observe({

@@ -18,7 +18,7 @@ if(!file.exists(sqlitePath)) {
 saveData = function(start, file, object, inverted) {
     db = dbConnect(SQLite(), sqlitePath)
     query = sprintf("INSERT INTO %s ('start', 'file', 'object', 'inverted') VALUES (:start, :file, :object, :inverted)", table)
-    dbGetQuery(db, query, list(start = start, file = file, object = object, inverted = inverted))
+    dbSendQuery(db, query, list(start = start, file = file, object = object, inverted = inverted))
     dbDisconnect(db)
 }
 

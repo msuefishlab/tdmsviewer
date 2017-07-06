@@ -74,7 +74,7 @@ savedServer = function(input, output, session, extrainput) {
             t = t - ret[i, ]$start
             dat = r$data
             close(myFile)
-            if(ret[i, ]$inverted) {
+            if(ret[i, ]$inverted == '-') {
                 dat = -dat
             }
 
