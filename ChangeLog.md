@@ -1,6 +1,7 @@
-## Version next
+## Version 0.5.3 - July 7th, 2017
 
 - Fix issues with shinyFiles
+- Integrate with eodplotter library (https://github.com/msuefishlab/eodplotter)
 
 ## Version 0.5.2 - April 7th, 2017
 
