@@ -21,7 +21,7 @@ Suggests:
     testthat,
     knitr,
     rmarkdown
-Remotes: msuefishlab/tdmsreader, thomasp85/shinyFiles
+Remotes: msuefishlab/tdmsreader, thomasp85/shinyFiles, msuefishlab/eodplotter
 License: MIT
 Encoding: UTF-8
 RoxygenNote: 6.0.1.9000
