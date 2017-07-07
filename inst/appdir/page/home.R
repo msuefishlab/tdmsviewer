@@ -193,9 +193,15 @@ homeServer = function(input, output, session) {
     })
 
     observeEvent(input$saveAll, {
-        p = eodplotter::peakFinder(filename = input$tdmsfile, channel = input$object, direction = input$direction, threshold = input$thresholdValue, start = ranges$xmin, end = ranges$xmax)
+        progress <- shiny::Progress$new()
+        p = eodplotter::peakFinder(filename = input$tdmsfile, channel = input$object, direction = input$direction, threshold = input$thresholdValue, start = ranges$xmin, end = ranges$xmax, progressCallback = function(val) {
+            print(val)
+            progress$set(val)
+        })
         apply(p, 1, function(r) {
-            saveData(start = r[1], inverted = r[2], file = input$tdmsfile, object = input$object)
+            try({
+                saveData(start = r[1], inverted = r[2], file = input$tdmsfile, object = input$object)
+            })
         })
     })
 

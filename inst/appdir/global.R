@@ -34,7 +34,7 @@ loadData = function() {
 deleteData = function(start, file, object) {
     db = dbConnect(SQLite(), sqlitePath)
     query = sprintf("DELETE FROM %s WHERE start=:start and file=:file and object=:object", table)
-    dbGetQuery(db, query, list(start = start, file = file, object = object))
+    dbSendQuery(db, query, list(start = start, file = file, object = object))
     dbDisconnect(db)
     data
 }
@@ -43,7 +43,7 @@ deleteData = function(start, file, object) {
 saveLandmark = function(landmark, value, description) {
     db = dbConnect(SQLite(), sqlitePath)
     query = sprintf("INSERT INTO %s ('landmark', 'value', 'description') VALUES (:landmark, :value, :description)", table2)
-    dbGetQuery(db, query, list(landmark = landmark, value = value, description = description))
+    dbSendQuery(db, query, list(landmark = landmark, value = value, description = description))
     dbDisconnect(db)
 }
 
