@@ -19,7 +19,7 @@ saveData = function(start, file, object, inverted) {
     db = dbConnect(SQLite(), sqlitePath)
     on.exit(dbDisconnect(db)) 
     query = sprintf("INSERT INTO %s ('start', 'file', 'object', 'inverted') VALUES (:start, :file, :object, :inverted)", table)
-    dbSendQuery(db, query, list(start = start, file = file, object = object, inverted = inverted))
+    dbGetQuery(db, query, list(start = start, file = file, object = object, inverted = inverted))
 }
 
 
@@ -35,16 +35,23 @@ deleteData = function(start, file, object) {
     db = dbConnect(SQLite(), sqlitePath)
     on.exit(dbDisconnect(db)) 
     query = sprintf("DELETE FROM %s WHERE start=:start and file=:file and object=:object", table)
-    dbSendQuery(db, query, list(start = start, file = file, object = object))
+    dbGetQuery(db, query, list(start = start, file = file, object = object))
     data
 }
 
+deleteAllData = function() {
+    db = dbConnect(SQLite(), sqlitePath)
+    on.exit(dbDisconnect(db)) 
+    query = sprintf("DROP TABLE %s", table)
+    dbGetQuery(db, query)
+    data
+}
 
 saveLandmark = function(landmark, value, description) {
     db = dbConnect(SQLite(), sqlitePath)
     on.exit(dbDisconnect(db)) 
     query = sprintf("INSERT INTO %s ('landmark', 'value', 'description') VALUES (:landmark, :value, :description)", table2)
-    dbSendQuery(db, query, list(landmark = landmark, value = value, description = description))
+    dbGetQuery(db, query, list(landmark = landmark, value = value, description = description))
 }
 
 

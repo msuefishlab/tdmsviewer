@@ -165,12 +165,7 @@ savedServer = function(input, output, session, extrainput) {
     }, priority = 1)
 
     observeEvent(input$deleteAll, {
-        ret = loadData()
-        ret = ret[input$table_rows_all, ]
-        for(i in 1:nrow(ret)) {
-            r = ret[i, ]
-            deleteData(r$start, r$file, r$object)
-        }
+        deleteAllData()
     }, priority = 1)
 
     observe({
