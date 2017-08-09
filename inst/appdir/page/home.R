@@ -53,10 +53,13 @@ homeServer = function(input, output, session) {
     peakFinder = reactive({
         progress <- shiny::Progress$new()
         progress$set(message = "Processing...", value = 0)
-        eodplotter::peakFinder(filename = input$tdmsfile, channel = input$object, direction = input$direction, threshold = input$thresholdValue, start = ranges$xmin, end = ranges$xmax, progressCallback = function(val) {
+        ret = eodplotter::peakFinder(filename = input$tdmsfile, channel = input$object, direction = input$direction, threshold = input$thresholdValue, start = ranges$xmin, end = ranges$xmax, progressCallback = function(val) {
             progress$set(val)
         })
+        progress$close()
+        ret
     })
+
 
     ranges = reactiveValues(xmin = 0, xmax = 1)
 
@@ -156,6 +159,7 @@ homeServer = function(input, output, session) {
         }
         s = ranges$xmin
         e = ranges$xmax
+
         if(input$saveAll) {
             p = peakFinder()
             eodplotter::plotTdms(f, input$object, s, e, peaks = p)
@@ -212,7 +216,6 @@ homeServer = function(input, output, session) {
                 saveData(start = r[1], inverted = r[2], file = input$tdmsfile, object = input$object)
             })
         })
-        progress$close()
         output$txt <- renderText(sprintf('Found %d EODs', nrow(p)))
     })
 
