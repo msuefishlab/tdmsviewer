@@ -50,6 +50,14 @@ homeServer = function(input, output, session) {
         })
     })
 
+    peakFinder = reactive({
+        progress <- shiny::Progress$new()
+        progress$set(message = "Processing...", value = 0)
+        eodplotter::peakFinder(filename = input$tdmsfile, channel = input$object, direction = input$direction, threshold = input$thresholdValue, start = ranges$xmin, end = ranges$xmax, progressCallback = function(val) {
+            progress$set(val)
+        })
+    })
+
     ranges = reactiveValues(xmin = 0, xmax = 1)
 
     observeEvent(input$plotBrush, {
@@ -148,7 +156,12 @@ homeServer = function(input, output, session) {
         }
         s = ranges$xmin
         e = ranges$xmax
-        eodplotter::plotTdms(f, input$object, s, e)
+        if(input$saveAll) {
+            p = peakFinder()
+            eodplotter::plotTdms(f, input$object, s, e, peaks = p)
+        } else {
+            eodplotter::plotTdms(f, input$object, s, e)
+        }
     })
 
     output$distPropertiesLabel = renderUI({
@@ -193,11 +206,7 @@ homeServer = function(input, output, session) {
     })
 
     observeEvent(input$saveAll, {
-        progress <- shiny::Progress$new()
-        progress$set(message = "Processing...", value = 0)
-        p = eodplotter::peakFinder(filename = input$tdmsfile, channel = input$object, direction = input$direction, threshold = input$thresholdValue, start = ranges$xmin, end = ranges$xmax, progressCallback = function(val) {
-            progress$set(val)
-        })
+        p = peakFinder()
         apply(p, 1, function(r) {
             try({
                 saveData(start = r[1], inverted = r[2], file = input$tdmsfile, object = input$object)
