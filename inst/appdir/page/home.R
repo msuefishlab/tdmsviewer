@@ -161,7 +161,9 @@ homeServer = function(input, output, session) {
         e = ranges$xmax
 
         if(input$saveAll) {
-            p = peakFinder()
+            peakFinder()
+            p = loadData()
+            p = p[p[,2]==input$tdmsfile,c(1,4)]
             eodplotter::plotTdms(f, input$object, s, e, peaks = p)
         } else {
             eodplotter::plotTdms(f, input$object, s, e)
