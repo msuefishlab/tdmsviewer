@@ -1,3 +1,8 @@
+## Version 0.6.0 - August 9th, 2017
+
+- Add ability to view the saved EODs as little red dots on the results screen
+- Update peak finding algorithm to use newer eodplotter version with adaptive variation
+
 ## Version 0.5.3 - July 7th, 2017
 
 - Fix issues with shinyFiles
