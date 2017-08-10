@@ -159,15 +159,9 @@ homeServer = function(input, output, session) {
         }
         s = ranges$xmin
         e = ranges$xmax
-
-        if(input$saveAll) {
-            peakFinder()
-            p = loadData()
-            p = p[p[,2]==input$tdmsfile,c(1,4)]
-            eodplotter::plotTdms(f, input$object, s, e, peaks = p)
-        } else {
-            eodplotter::plotTdms(f, input$object, s, e)
-        }
+        p = loadData()
+        p = p[p[,2]==input$tdmsfile,c(1,4)]
+        eodplotter::plotTdms(f, input$object, s, e, peaks = p)
     })
 
     output$distPropertiesLabel = renderUI({

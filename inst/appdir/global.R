@@ -40,7 +40,7 @@ deleteData = function(start, file, object) {
 deleteAllData = function() {
     db = dbConnect(SQLite(), sqlitePath)
     on.exit(dbDisconnect(db)) 
-    query = sprintf("DROP TABLE %s", table)
+    query = sprintf("DELETE FROM %s", table)
     dbSendQuery(db, query)
 }
 
