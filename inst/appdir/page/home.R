@@ -62,6 +62,7 @@ homeServer = function(input, output, session) {
 
 
     ranges = reactiveValues(xmin = 0, xmax = 1)
+    replot = reactiveVal(0)
 
     observeEvent(input$plotBrush, {
         brush = input$plotBrush
@@ -159,6 +160,8 @@ homeServer = function(input, output, session) {
         }
         s = ranges$xmin
         e = ranges$xmax
+        replot()
+        
         p = loadData()
         p = p[p[,2]==input$tdmsfile,c(1,4)]
         eodplotter::plotTdms(f, input$object, s, e, peaks = p)
@@ -212,6 +215,8 @@ homeServer = function(input, output, session) {
                 saveData(start = r[1], inverted = r[2], file = input$tdmsfile, object = input$object)
             })
         })
+        newVal <- replot() + 1
+        replot(newVal)
         output$txt <- renderText(sprintf('Found %d EODs', nrow(p)))
     })
 
