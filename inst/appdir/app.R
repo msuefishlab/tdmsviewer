@@ -23,6 +23,7 @@ server = function(input, output, session) {
     source('page/saved.R', local = T)
     source('page/help.R', local = T)
     source('page/landmark_page.R', local = T)
+
     extrainput = callModule(homeServer, 'home')
     moreinput = callModule(savedServer, 'saved', extrainput)
     callModule(landmarkpageServer, 'landmarkpage', moreinput)

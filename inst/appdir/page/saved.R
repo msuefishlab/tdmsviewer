@@ -188,7 +188,7 @@ savedServer = function(input, output, session, extrainput) {
     observeEvent(input$deleteAll, {
         db = dbConnect(SQLite(), sqlitePath)
         on.exit(dbDisconnect(db)) 
-        query = sprintf("DELETE FROM %s", table)
+        query = sprintf("DELETE FROM %s WHERE file = '%s'", table, input$dropdown)
         dbSendQuery(db, query)
     }, priority = 1)
 
@@ -321,6 +321,7 @@ savedServer = function(input, output, session, extrainput) {
     })
 
     output$dropdownrender = renderUI({
+        extrainput$saveAll
         db = dbConnect(SQLite(), sqlitePath)
         on.exit(dbDisconnect(db)) 
         query = sprintf("SELECT DISTINCT file FROM responses")
