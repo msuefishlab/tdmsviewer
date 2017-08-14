@@ -163,7 +163,12 @@ homeServer = function(input, output, session) {
         e = ranges$xmax
         replot()
         
-        p = loadData()
+        db = dbConnect(SQLite(), sqlitePath)
+        on.exit(dbDisconnect(db)) 
+        query = sprintf("SELECT start, file, object, inverted, timestamp FROM responses WHERE file = '%s'", f)
+        p = dbGetQuery(db, query)
+
+
         p = p[p[,2]==input$tdmsfile,c(1,4)]
         eodplotter::plotTdms(f, input$object, s, e, peaks = p)
     })
