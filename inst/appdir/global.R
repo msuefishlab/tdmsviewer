@@ -15,34 +15,7 @@ if(!file.exists(sqlitePath)) {
     dbSendQuery(db, query2)
 }
 
-saveData = function(start, file, object, inverted) {
-    db = dbConnect(SQLite(), sqlitePath)
-    on.exit(dbDisconnect(db)) 
-    query = sprintf("INSERT INTO %s ('start', 'file', 'object', 'inverted') VALUES (:start, :file, :object, :inverted)", table)
-    dbSendQuery(db, query, list(start = start, file = file, object = object, inverted = inverted))
-}
 
-
-loadData = function() {
-    db = dbConnect(SQLite(), sqlitePath)
-    on.exit(dbDisconnect(db)) 
-    query = sprintf("SELECT start, file, object, inverted, timestamp FROM %s", table)
-    dbGetQuery(db, query)
-}
-
-deleteData = function(start, file, object) {
-    db = dbConnect(SQLite(), sqlitePath)
-    on.exit(dbDisconnect(db)) 
-    query = sprintf("DELETE FROM %s WHERE start=:start and file=:file and object=:object", table)
-    dbSendQuery(db, query, list(start = start, file = file, object = object))
-}
-
-deleteAllData = function() {
-    db = dbConnect(SQLite(), sqlitePath)
-    on.exit(dbDisconnect(db)) 
-    query = sprintf("DELETE FROM %s", table)
-    dbSendQuery(db, query)
-}
 
 saveLandmark = function(landmark, value, description) {
     db = dbConnect(SQLite(), sqlitePath)

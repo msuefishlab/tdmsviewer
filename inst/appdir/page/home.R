@@ -211,9 +211,12 @@ homeServer = function(input, output, session) {
 
     observeEvent(input$saveAll, {
         p = peakFinder()
+        db = dbConnect(SQLite(), sqlitePath)
+        on.exit(dbDisconnect(db)) 
         apply(p, 1, function(r) {
             try({
-                saveData(start = r[1], inverted = r[2], file = input$tdmsfile, object = input$object)
+                query = sprintf("INSERT INTO %s ('start', 'file', 'object', 'inverted') VALUES (:start, :file, :object, :inverted)", table)
+                dbSendQuery(db, query, list(start = r[1], file = input$tdmsfile, object = input$object, inverted = r[2]))
             })
         })
         newVal <- replot() + 1

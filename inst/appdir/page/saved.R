@@ -39,18 +39,24 @@ savedServer = function(input, output, session, extrainput) {
         if(!input$selectAll && is.null(input$table_rows_selected)) {
             return()
         }
+        if(is.null(input$dropdown)) {
+            return()
+        }
+
         input$deleteButton
         input$deleteAll
         extrainput$saveAll
-        
-        ret = loadData()
+
+        db = dbConnect(SQLite(), sqlitePath)
+        on.exit(dbDisconnect(db)) 
+        query = sprintf("SELECT start, file, object, inverted, timestamp FROM %s WHERE file = '%s'", table, input$dropdown)
+        ret = dbGetQuery(db, query)
 
         if(input$selectAll) {
             ret = ret[input$table_rows_all, ]
         } else {
             ret = ret[input$table_rows_selected, ]
         }
-
         vec = NULL
         t = numeric(0)
         plotdata = data.frame(col = numeric(0), time = numeric(0), dat = numeric(0))
@@ -104,10 +110,17 @@ savedServer = function(input, output, session, extrainput) {
     })
 
     output$table = DT::renderDataTable({
+        if(is.null(input$dropdown)) {
+            return()
+        }
         input$deleteButton
         input$deleteAll
         extrainput$saveAll
-        loadData()
+
+        db = dbConnect(SQLite(), sqlitePath)
+        on.exit(dbDisconnect(db)) 
+        query = sprintf("SELECT start, file, object, inverted, timestamp FROM %s WHERE file = '%s'", table, input$dropdown)
+        dbGetQuery(db, query)
     })
 
     output$plot = renderPlot({
@@ -158,15 +171,24 @@ savedServer = function(input, output, session, extrainput) {
     })
 
     observeEvent(input$deleteButton, {
-        ret = loadData()
+        db = dbConnect(SQLite(), sqlitePath)
+        on.exit(dbDisconnect(db)) 
+
+        query = sprintf("SELECT start, file, object, inverted, timestamp FROM %s WHERE file = '%s'", table, input$dropdown)
+        ret = dbGetQuery(db, query)
         ret = ret[input$table_rows_selected, ]
+
         for(i in 1:nrow(ret)) {
-            deleteData(ret[i, ]$start, ret[i, ]$file, ret[i, ]$object)
+            query = sprintf("DELETE FROM %s WHERE start=:start and file=:file and object=:object", table)
+            dbSendQuery(db, query, list(start = ret[i,]$start, file = ret[i,]$file, object = ret[i,]$object))
         }
     }, priority = 1)
 
     observeEvent(input$deleteAll, {
-        deleteAllData()
+        db = dbConnect(SQLite(), sqlitePath)
+        on.exit(dbDisconnect(db)) 
+        query = sprintf("DELETE FROM %s", table)
+        dbSendQuery(db, query)
     }, priority = 1)
 
     observe({
@@ -300,11 +322,9 @@ savedServer = function(input, output, session, extrainput) {
     output$dropdownrender = renderUI({
         db = dbConnect(SQLite(), sqlitePath)
         on.exit(dbDisconnect(db)) 
-        query = sprintf("SELECT DISTINCT file FROM responses", table)
+        query = sprintf("SELECT DISTINCT file FROM responses")
         ret = dbGetQuery(db, query)
-        print(ret)
-
-        selectInput(session$ns('dropdown'), 'Select session', ret)
+        selectInput(session$ns('dropdown'), 'Select session', unname(ret))
     })
 
     setBookmarkExclude(
