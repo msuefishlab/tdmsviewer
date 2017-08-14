@@ -119,8 +119,9 @@ savedServer = function(input, output, session, extrainput) {
 
         db = dbConnect(SQLite(), sqlitePath)
         on.exit(dbDisconnect(db)) 
-        query = sprintf("SELECT start, file, object, inverted, timestamp FROM %s WHERE file = '%s'", table, input$dropdown)
+        query = sprintf("SELECT start, object, inverted, timestamp FROM %s WHERE file = '%s'", table, input$dropdown)
         dbGetQuery(db, query)
+
     })
 
     output$plot = renderPlot({
@@ -324,7 +325,8 @@ savedServer = function(input, output, session, extrainput) {
         on.exit(dbDisconnect(db)) 
         query = sprintf("SELECT DISTINCT file FROM responses")
         ret = dbGetQuery(db, query)
-        selectInput(session$ns('dropdown'), 'Select session', unname(ret))
+        ret = ret$file
+        selectInput(session$ns('dropdown'), 'Select session', ret)
     })
 
     setBookmarkExclude(
