@@ -1,3 +1,8 @@
+## Version 0.7.0 = August 14th, 2017
+
+- Add ability to save sessions
+- Clean up SQLite database code that was spawning too many open files errors
+
 ## Version 0.6.0 - August 9th, 2017
 
 - Add ability to view the saved EODs as little red dots on the results screen
