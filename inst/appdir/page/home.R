@@ -53,6 +53,7 @@ homeServer = function(input, output, session) {
     peakFinder = reactive({
         progress <- shiny::Progress$new()
         progress$set(message = "Processing...", value = 0)
+        print(input$tdmsfile)
         ret = eodplotter::peakFinder(filename = input$tdmsfile, channel = input$object, direction = input$direction, threshold = input$thresholdValue, start = ranges$xmin, end = ranges$xmax, progressCallback = function(val) {
             progress$set(val)
         })
@@ -225,6 +226,16 @@ homeServer = function(input, output, session) {
         session$doBookmark()
     })
 
+    setBookmarkExclude(
+        c(
+            'moveRight',
+            'moveLeft',
+            'zoomOut',
+            'zoomIn',
+            'saveAll',
+            'plot_brush'
+        )
+    )
 
     return (input)
 }

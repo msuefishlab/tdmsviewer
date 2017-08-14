@@ -21,6 +21,7 @@ savedUI = function(id) {
             actionButton(ns('analyzeWaveform'), 'Find landmarks')
         ),
         mainPanel(
+            uiOutput(ns('dropdownrender')),
             DT::dataTableOutput(ns('table')),
             plotOutput(ns('plot'),
                 click = ns('plotClick'),
@@ -295,6 +296,27 @@ savedServer = function(input, output, session, extrainput) {
         }
         output$saved <- renderText(sprintf('Saved %d landmarks', nrow(landmarks)))
     })
+
+    output$dropdownrender = renderUI({
+        db = dbConnect(SQLite(), sqlitePath)
+        on.exit(dbDisconnect(db)) 
+        query = sprintf("SELECT DISTINCT file FROM responses", table)
+        ret = dbGetQuery(db, query)
+        print(ret)
+
+        selectInput(session$ns('dropdown'), 'Select session', ret)
+    })
+
+    setBookmarkExclude(
+        c(
+            'deleteAll',
+            'deleteButton',
+            'analyzeWaveform',
+            'saveLandmarksButton'
+        )
+    )
+
+
 
     return (input)
 }

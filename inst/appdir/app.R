@@ -35,27 +35,6 @@ server = function(input, output, session) {
     onBookmarked(function(url) {
         updateQueryString(url)
     })
-    setBookmarkExclude(
-        c(
-            'saved-table_rows_current',
-            'saved-table_cell_clicked',
-            'saved-table_rows_all',
-            'saved-table_state',
-            'saved-table_rows_selected',
-            'saved-deleteButton',
-            'saved-analyzeWaveform',
-            'saved-saveLandmarksButton',
-            'saved-landmark-save_landmark',
-            'saved-landmark-time_value',
-            'saved-landmark-landmark',
-            'home-moveRight',
-            'home-moveLeft',
-            'home-zoomOut',
-            'home-zoomIn',
-            'home-saveAll',
-            'home-plot_brush'
-        )
-    )
 }
 
 shinyApp(ui = ui, server = server, enableBookmarking = 'url')

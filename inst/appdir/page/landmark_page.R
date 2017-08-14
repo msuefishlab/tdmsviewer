@@ -97,7 +97,13 @@ landmarkpageServer = function(input, output, session, extrainput) {
             write.csv(ret, file, quote = F)
         }
     )
-
+    setBookmarkExclude(
+        c(
+            'landmark-save_landmark',
+            'landmark-time_value',
+            'landmark-landmark'
+        )
+    )
     observe({
         extrainput$landmarkSave
         input$deleteAll
